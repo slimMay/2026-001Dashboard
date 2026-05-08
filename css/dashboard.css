@@ -1,0 +1,698 @@
+:root {
+    --accent: #4fd8c4;
+    --accent2: #f7688a;
+    --accent3: #ffcc44;
+    --txt: #e8e4ff;
+    --muted: rgba(180,172,230,0.65);
+    /* ★ 調這兩個 CSS 變數控制玻璃透明度 ★ */
+    --glass-bg: rgba(18, 14, 44, 0.22);
+    --glass-bg2: rgba(12, 10, 32, 0.32);
+    --glass-blur: blur(18px);
+    --glass-border: rgba(140,120,255,0.52);
+    --glass-shine: rgba(255,255,255,0.045);
+    --radius: 14px;
+    --font: 'Noto Sans TC','PingFang TC',sans-serif;
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: var(--font);
+    color: var(--txt);
+    background: #0d0b22;
+}
+
+
+/* ════════════════════════════════════════
+           底層：地圖全螢幕
+        ════════════════════════════════════════ */
+
+#main {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+}
+
+/* ════════════════════════════════════════
+           浮層 — pointer-events: none (穿透底層地圖)
+           子元件個別開啟 pointer-events: all
+        ════════════════════════════════════════ */
+#overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    pointer-events: none;
+    display: grid;
+    /*grid-template-columns: 300px 1fr 320px;*/
+    grid-template-columns: 620px 1fr 620px;
+    grid-template-rows: 1fr auto;
+    grid-template-areas:
+        "left  mid  right"
+        "bot   bot  bot";
+    gap: 10px;
+    padding: 12px;
+}
+
+/* 中央欄完全穿透 */
+.mid-pass {
+    grid-area: mid;
+    pointer-events: none;
+}
+
+/* ════════════════════════════════════════
+           玻璃卡片
+        ════════════════════════════════════════ */
+.glass {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    box-shadow: inset 0 1px 0 var(--glass-shine), 0 4px 24px rgba(0,0,0,0.35);
+    pointer-events: all; /* 開啟互動 */
+}
+
+.card {
+    padding: 13px 15px;
+}
+
+.card-title {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* ════ 左側面板 ════ */
+.panel-left {
+    grid-area: left;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(120,100,255,0.10) transparent;
+}
+
+/* widget-header */
+#widget-header .city-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--txt);
+    margin-bottom: 10px;
+}
+
+#widget-header .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 11px;
+}
+
+#widget-header .tab {
+    padding: 4px 11px;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    border: 1px solid var(--glass-border);
+    color: var(--muted);
+    background: transparent;
+    transition: all .2s;
+    font-family: var(--font);
+}
+
+    #widget-header .tab.active {
+        background: var(--accent);
+        color: #0d0b22;
+        border-color: var(--accent);
+        font-weight: 700;
+    }
+
+.total-row {
+    font-size: 13px;
+    color: var(--muted);
+}
+
+.total-val {
+    color: var(--accent2);
+    font-size: 19px;
+    font-weight: 700;
+}
+
+/* placeholder */
+.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 75px;
+    color: var(--muted);
+    font-size: 12px;
+    border: 1px dashed rgba(120,100,255,0.2);
+    border-radius: 8px;
+    margin-top: 4px;
+}
+
+/* progress bars */
+.prog-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.prog-label {
+    font-size: 11px;
+    color: var(--muted);
+    width: 58px;
+    flex-shrink: 0;
+}
+
+.prog-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.prog-bar {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--accent);
+}
+
+    .prog-bar.warn {
+        background: var(--accent3);
+    }
+
+    .prog-bar.danger {
+        background: var(--accent2);
+    }
+
+.prog-val {
+    font-size: 11px;
+    color: var(--txt);
+    width: 34px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+/* ════ 右側面板 ════ */
+.panel-right {
+    grid-area: right;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(120,100,255,0.10) transparent;
+}
+
+/* search */
+#widget-search input {
+    width: 100%;
+    background: rgba(255,255,255,0.07);
+    border: 1px solid var(--glass-border);
+    border-radius: 9px;
+    color: var(--txt);
+    font-size: 13px;
+    padding: 8px 12px;
+    outline: none;
+    font-family: var(--font);
+}
+
+    #widget-search input::placeholder {
+        color: var(--muted);
+    }
+
+    #widget-search input:focus {
+        border-color: var(--accent);
+    }
+
+/* ranking table */
+#widget-ranking table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 16px;
+    overflow: clip; /* 加這一行 */
+}
+
+#widget-ranking thead th {
+    color: var(--muted);
+    font-weight: 500;
+    padding: 3px 5px;
+    text-align: left;
+    border-bottom: 1px solid rgba(120,100,255,0.15);
+    white-space: nowrap;
+}
+
+
+#widget-ranking tbody tr:hover {
+    background: rgba(140,120,255,0.52);
+}
+
+#widget-ranking tbody td {
+    padding: 4px 5px;
+    font-size: 16px;
+    border-bottom: 1px solid rgba(180,172,230,0.15);
+    position: relative;
+    white-space: nowrap;
+}
+
+#widget-ranking tbody td:hover:before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -9999px;
+    bottom: -9999px;
+    background-color: rgba(140,120,255,0.32);
+    z-index: -1;
+}
+
+.rank-no {
+    color: var(--muted);
+    font-size: 11px;
+}
+
+    .rank-no.top3 {
+        color: var(--accent3);
+        font-weight: 700;
+    }
+
+.val-col {
+    color: var(--accent);
+    font-size: 10px;
+}
+
+/* ════ 底部面板 ════ */
+.panel-bot {
+    grid-area: bot;
+    display: flex;
+    gap: 9px;
+    flex-direction: column; /* 包含 toggle bar + content row */
+}
+
+/* ── Collapse toggle bar ── */
+#bot-toggle-bar {
+    pointer-events: all;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 18px;
+    cursor: pointer;
+    border-radius: 10px;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: inset 0 1px 0 var(--glass-shine);
+    user-select: none;
+    transition: background .15s;
+}
+
+    #bot-toggle-bar:hover {
+        background: rgba(30,24,60,0.90);
+    }
+
+    #bot-toggle-bar .toggle-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 22px;
+        color: var(--muted);
+    }
+
+    #bot-toggle-bar .toggle-title {
+        font-size: 20px;
+        font-weight: 500;
+        color: var(--txt);
+    }
+
+    #bot-toggle-bar .toggle-pills {
+        display: flex;
+        gap: 6px;
+    }
+
+    #bot-toggle-bar .pill {
+        font-size: 18px;
+        padding: 2px 8px;
+        border-radius: 3px;
+        border: 1px solid var(--glass-border);
+        color: var(--muted);
+        background: rgba(255,255,255,0.04);
+    }
+
+        #bot-toggle-bar .pill.accent {
+            color: var(--accent);
+            border-color: rgba(79,216,196,0.3);
+        }
+
+/* 箭頭圖示 */
+#bot-chevron {
+    font-size: 20px;
+    color: var(--muted);
+    transition: transform .3s ease;
+    line-height: 1;
+}
+
+/* ── Content row（可展開/收合）── */
+#bot-content {
+    display: flex;
+    gap: 9px;
+    overflow: hidden;
+    /* 展開狀態：max-height 留夠大的值；收合時降到 0 */
+    max-height: 550px;
+    opacity: 1;
+    transition: max-height .35s cubic-bezier(.4,0,.2,1), opacity .25s ease, margin-top .35s ease;
+    margin-top: 0;
+}
+
+/* 收合狀態 */
+.panel-bot.collapsed #bot-content {
+    max-height: 0;
+    opacity: 0;
+    margin-top: -9px; /* 補回 gap */
+    pointer-events: none;
+}
+
+/* 箭頭旋轉 */
+.panel-bot.collapsed #bot-chevron {
+    transform: rotate(180deg);
+}
+
+/* KPI */
+#widget-kpi {
+    flex: 0 0 auto;
+    min-width: 250px;
+}
+
+.stats-mini {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 7px;
+    margin-top: 8px;
+}
+
+.stat-cell {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 8px 9px;
+}
+
+.s-label {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 3px;
+}
+
+.s-val {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--accent2);
+}
+
+    .s-val.teal {
+        color: var(--accent);
+    }
+
+    .s-val.yellow {
+        color: var(--accent3);
+    }
+
+.s-unit {
+    font-size: 14px;
+    color: var(--muted);
+    margin-left: 1px;
+}
+
+/* 即時/年度進度條 */
+.bprog-wrap {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.bprog-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bprog-label {
+    font-size: 11px;
+    color: var(--muted);
+    width: 28px;
+    flex-shrink: 0;
+}
+
+.bprog-bg {
+    flex: 1;
+    height: 8px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.bprog-fill {
+    height: 100%;
+    border-radius: 4px;
+}
+
+.fill-red {
+    background: linear-gradient(90deg,#f7688a,#e09020);
+}
+
+.fill-green {
+    background: linear-gradient(90deg,#4fd8c4,#30e060);
+}
+
+.bprog-val {
+    font-size: 11px;
+    color: var(--txt);
+    width: 38px;
+    text-align: right;
+    flex-shrink: 0;
+}
+
+/* chart */
+#widget-chart {
+    flex: 1;
+    min-width: 0;
+}
+
+.chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.chart-legend {
+    display: flex;
+    gap: 12px;
+    font-size: 10px;
+    color: var(--muted);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.legend-dot {
+    width: 8px;
+    height: 5px;
+    border-radius: 2px;
+}
+
+.chart-wrap {
+    height: 90px;
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    overflow: hidden;
+}
+
+.bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.bar-fill {
+    width: 100%;
+    background: rgba(79,216,196,0.28);
+    border-radius: 2px 2px 0 0;
+    border-top: 2px solid var(--accent);
+    min-height: 2px;
+}
+
+.bar-x {
+    font-size: 8px;
+    color: var(--muted);
+}
+
+/* live badge */
+.live-badge {
+    background: rgba(79,216,196,0.1);
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    color: var(--accent);
+    font-size: 10px;
+    padding: 2px 7px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+    .live-badge::before {
+        content: '';
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--accent);
+        animation: blink 1.4s ease-in-out infinite;
+    }
+
+@keyframes blink {
+    0%,100% {
+        opacity: 1
+    }
+
+    50% {
+        opacity: .15
+    }
+}
+
+/* ════ RWD — 平板 ≤ 1100px ════ */
+@media (max-width: 1100px) {
+    #overlay {
+        grid-template-columns: 260px 1fr;
+        grid-template-rows: 1fr auto;
+        grid-template-areas:
+            "left  right"
+            "bot   bot";
+    }
+
+    .mid-pass {
+        display: none;
+    }
+}
+
+/* ════ RWD — 手機 ≤ 680px ════ */
+@media (max-width: 680px) {
+
+    /* 手機改為正常文件流，讓內容可以捲動 */
+    html, body {
+        overflow: auto;
+    }
+
+    /* 地圖底層縮回正常流（不 fixed，嵌入頁面頂部） */
+    #map-layer {
+        position: relative;
+        width: 100%;
+        height: 56vw; /* 維持地圖比例 */
+        min-height: 220px;
+        max-height: 320px;
+        z-index: 0;
+    }
+    /* 縮放按鈕固定在地圖右下 */
+    .map-controls {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+    }
+
+    /* overlay 改成正常流、單欄、可捲動 */
+    #overlay {
+        position: relative;
+        inset: auto;
+        z-index: auto;
+        pointer-events: all;
+        overflow: visible;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        padding: 8px;
+        /* 清除桌面 grid 設定 */
+        grid-template-columns: unset;
+        grid-template-rows: unset;
+        grid-template-areas: unset;
+    }
+
+    /* 所有面板改成全寬，恢復正常高度 */
+    .panel-left,
+    .panel-right {
+        max-height: none;
+        overflow: visible;
+    }
+
+    /* 底部面板垂直排列 */
+    .panel-bot {
+        flex-direction: column;
+    }
+
+    #bot-content {
+        flex-direction: column;
+        max-height: 1000px;
+    }
+
+    #widget-kpi {
+        /*min-width: unset;*/
+       width: 410px;
+    }
+
+    /* Toggle bar pills 手機自動換行 */
+    #bot-toggle-bar .toggle-pills {
+        flex-wrap: wrap;
+        gap: 4px;
+    }
+
+    #bot-toggle-bar .toggle-title {
+        font-size: 11px;
+    }
+
+    /* KPI 3欄 → 手機保持3欄但字縮小 */
+    .stats-mini {
+        grid-template-columns: repeat(3,1fr);
+        gap: 5px;
+    }
+
+    .s-val {
+        font-size: 14px;
+    }
+}
+
+
+
+::-webkit-scrollbar {
+    width: 3px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(120,100,255,0.28);
+    border-radius: 2px;
+}

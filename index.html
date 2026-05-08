@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>台北市 即時數據</title>
+    <script src="https://fastly.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://fastly.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://www.amcharts.com/lib/3/amcharts.js"></script>
+    <script src="https://www.amcharts.com/lib/3/serial.js"></script>
+    <script src="https://www.amcharts.com/lib/3/themes/dark.js"></script>
+    <script src="https://www.amcharts.com/lib/3/plugins/responsive/responsive.min.js"></script>
+    <script src="./js/amCharts.js"></script>
+    <link rel="stylesheet" href="./css/dashboard.css">
+    <link rel="stylesheet" href="./css/amCharts.css">
+
+</head>
+<body>
+    <!-- ══════════════════════════════════════════
+         底層：地圖（全螢幕，可拖移/縮放）
+    ══════════════════════════════════════════ -->
+    <div id="map-layer">
+        <div id="map-inner">
+            <div id="main"></div>
+        </div>
+    </div>
+
+
+
+    <!-- ══════════════════════════════════════════
+         浮層：半透明玻璃 panels
+    ══════════════════════════════════════════ -->
+    <div id="overlay">
+
+        <!-- 中央穿透（讓地圖可互動） -->
+        <div class="mid-pass"></div>
+
+        <!-- ════ 左側面板 ════ -->
+        <div class="panel-left">
+
+            <!-- WIDGET: 城市標題 / 標籤 / 總業績 -->
+            <div class="glass card" id="widget-header">
+                <div class="city-title">台北市 即時數據</div>
+                <div class="tabs">
+                    <button class="tab active" onclick="switchTab(this)">達成率</button>
+                    <button class="tab" onclick="switchTab(this)">營業額排名</button>
+                    <button class="tab" onclick="switchTab(this)">門市家數</button>
+                </div>
+                <div class="total-row">
+                    總業績：<span class="total-val">1,342,421</span>
+                    <span style="font-size:12px;color:var(--muted)"> 萬元</span>
+                </div>
+            </div>
+
+            <!-- WIDGET: 行政區佔比 -->
+            <div class="glass card" id="widget-district-pie">
+                <div class="card-title">行政區佔比</div>
+                <!-- 🔧 圓餅/橫條圖元件放置區 -->
+                <select id="map-select" onchange="switchMap(this.value)" style="padding:4px 8px;">
+                    <option value="taiwan">全台灣</option>
+                    <option value="taipei">臺北市</option>
+                    <option value="newtaipei">新北市</option>
+                </select>
+                <div class="placeholder">圖表元件放置區</div>
+            </div>
+
+            <!-- WIDGET: 各區達成率進度條 -->
+            <div class="glass card" id="widget-progress">
+                <div class="card-title">北一處 各區達成率</div>
+                <div class="prog-row">
+                    <div class="prog-label">信義區</div>
+                    <div class="prog-bar-bg"><div class="prog-bar danger" style="width:100%"></div></div>
+                    <div class="prog-val" style="color:var(--accent2)">210%</div>
+                </div>
+                <div class="prog-row">
+                    <div class="prog-label">北投區</div>
+                    <div class="prog-bar-bg"><div class="prog-bar warn" style="width:85%"></div></div>
+                    <div class="prog-val">85%</div>
+                </div>
+                <div class="prog-row">
+                    <div class="prog-label">文山區</div>
+                    <div class="prog-bar-bg"><div class="prog-bar" style="width:78%"></div></div>
+                    <div class="prog-val">78%</div>
+                </div>
+                <div class="prog-row">
+                    <div class="prog-label">士林區</div>
+                    <div class="prog-bar-bg"><div class="prog-bar warn" style="width:92%"></div></div>
+                    <div class="prog-val">92%</div>
+                </div>
+                <div class="prog-row">
+                    <div class="prog-label">內湖區</div>
+                    <div class="prog-bar-bg"><div class="prog-bar" style="width:66%"></div></div>
+                    <div class="prog-val">66%</div>
+                </div>
+                <div class="prog-row">
+                    <div class="prog-label">信義區11</div>
+                    <div class="prog-bar-bg"><div class="prog-bar danger" style="width:100%"></div></div>
+                    <div class="prog-val" style="color:var(--accent2)">210%</div>
+                </div>
+                <div class="prog-row">
+                    <div class="prog-label">北投區11</div>
+                    <div class="prog-bar-bg"><div class="prog-bar warn" style="width:85%"></div></div>
+                    <div class="prog-val">85%</div>
+                </div>
+                <div class="prog-row">
+                    <div class="prog-label">文山區11</div>
+                    <div class="prog-bar-bg"><div class="prog-bar" style="width:78%"></div></div>
+                    <div class="prog-val">78%</div>
+                </div>
+                <div class="prog-row">
+                    <div class="prog-label">士林區11</div>
+                    <div class="prog-bar-bg"><div class="prog-bar warn" style="width:92%"></div></div>
+                    <div class="prog-val">92%</div>
+                </div>
+                <div class="prog-row">
+                    <div class="prog-label">內湖區11</div>
+                    <div class="prog-bar-bg"><div class="prog-bar" style="width:66%"></div></div>
+                    <div class="prog-val">66%</div>
+                </div>
+            </div>
+
+            <!-- WIDGET: 自由放置區 A -->
+            <div class="glass card" id="widget-free-a">
+                <div class="card-title">
+                    <span>自訂元件 A</span>
+                    <span style="font-size:16px;color:var(--muted);cursor:pointer">⋮</span>
+                </div>
+                <!-- 🔧 替換成你的元件 -->
+                <div class="placeholder" style="height:90px">元件放置區 A</div>
+            </div>
+
+        </div><!-- /panel-left -->
+        <!-- ════ 右側面板 ════ -->
+        <div class="panel-right">
+
+            <!-- WIDGET: 搜尋列 -->
+            <div class="glass card" id="widget-search">
+                <input type="text" placeholder="搜尋門市、區域…">
+            </div>
+
+            <!-- WIDGET: 排名表格 -->
+            <div class="glass card" id="widget-ranking">
+                <div class="card-title">
+                    <span>營業額排名</span>
+                    <span style="font-size:11px;color:var(--accent);cursor:pointer">全部 ▸</span>
+                </div>
+                <!-- 🔧 表格元件放置區 -->
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>區</th><th>門市</th><th>業績</th><th>來客數</th><th>客單價</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td class="rank-no top3">1</td><td>信義區</td><td>12</td><td class="val-col">1,947,944</td><td class="val-col">2,998</td><td class="val-col">1,582</td></tr>
+                        <tr><td class="rank-no top3">2</td><td>北投區</td><td>12</td><td class="val-col">1,887,944</td><td class="val-col">2,698</td><td class="val-col">1,982</td></tr>
+                        <tr><td class="rank-no top3">3</td><td>文山區</td><td>12</td><td class="val-col">1,947,944</td><td class="val-col">2,998</td><td class="val-col">1,582</td></tr>
+                        <tr><td class="rank-no">4</td><td>南港區</td><td>12</td><td class="val-col">1,947,944</td><td class="val-col">2,998</td><td class="val-col">1,582</td></tr>
+                        <tr><td class="rank-no">5</td><td>內湖區</td><td>13</td><td class="val-col">1,887,944</td><td class="val-col">2,698</td><td class="val-col">1,982</td></tr>
+                        <tr><td class="rank-no">6</td><td>中山區</td><td>13</td><td class="val-col">1,947,944</td><td class="val-col">2,998</td><td class="val-col">1,582</td></tr>
+                        <tr><td class="rank-no">7</td><td>大安區</td><td>12</td><td class="val-col">1,947,944</td><td class="val-col">2,998</td><td class="val-col">1,582</td></tr>
+                        <tr><td class="rank-no">8</td><td>萬華區</td><td>12</td><td class="val-col">1,887,944</td><td class="val-col">2,698</td><td class="val-col">1,982</td></tr>
+                        <tr><td class="rank-no">9</td><td>松山區</td><td>11</td><td class="val-col">1,947,944</td><td class="val-col">2,998</td><td class="val-col">1,582</td></tr>
+                        <tr><td class="rank-no">10</td><td>中正區</td><td>12</td><td class="val-col">1,947,944</td><td class="val-col">2,998</td><td class="val-col">1,582</td></tr>
+                        <tr><td class="rank-no">11</td><td>大同區</td><td>11</td><td class="val-col">1,887,944</td><td class="val-col">2,698</td><td class="val-col">1,982</td></tr>
+                        <tr><td class="rank-no">12</td><td>士林區</td><td>11</td><td class="val-col">1,947,944</td><td class="val-col">2,998</td><td class="val-col">1,582</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- WIDGET: 自由放置區 B -->
+            <div class="glass card" id="widget-free-b">
+                <div class="card-title">自訂元件 B</div>
+                <!-- 🔧 替換成你的元件 -->
+                <div class="placeholder">元件放置區 B</div>
+            </div>
+
+        </div><!-- /panel-right -->
+        <!-- ════ 底部面板（含 Collapse）════ -->
+        <div class="panel-bot" id="panel-bot">
+
+            <!-- ── Collapse Toggle Bar ── -->
+            <div id="bot-toggle-bar" onclick="toggleBot()" title="展開／收合底部面板">
+                <div class="toggle-left">
+                    <span class="toggle-title">北一處 3 月即時業績</span>
+                    <div class="toggle-pills">
+                        <span class="pill accent">累計 20,173.7億</span>
+                        <span class="pill">客單 2,330元</span>
+                        <span class="pill">來客 2,218人</span>
+                        <span class="pill">即時 42.5%</span>
+                        <span class="pill">年度 82.2%</span>
+                    </div>
+                </div>
+                <span id="bot-chevron">▲</span>
+            </div>
+
+            <!-- ── 可收合內容區 ── -->
+            <div id="bot-content" style="height: 550px;">
+
+                <!-- WIDGET: KPI + 進度條 -->
+                <div class="glass card" id="widget-kpi" >
+                    <div class="card-title" style="margin-bottom:0">
+                        <span style="font-weight:700;color:var(--txt);font-size:15px">北一處 3 月即時業績</span>
+                        <span class="live-badge">LIVE DATA</span>
+                    </div>
+                    <!-- 🔧 KPI 元件放置區 -->
+                    <div class="stats-mini">
+                        <div class="stat-cell">
+                            <div class="s-label">累計總業績</div>
+                            <div class="s-val teal">20,173.7<span class="s-unit">億</span></div>
+                        </div>
+                        <div class="stat-cell">
+                            <div class="s-label">平均客單價</div>
+                            <div class="s-val yellow">330<span class="s-unit">元</span></div>
+                        </div>
+                        <div class="stat-cell">
+                            <div class="s-label">累計來客數</div>
+                            <div class="s-val">2,218<span class="s-unit">人</span></div>
+                        </div>
+                    </div>
+                    <div class="bprog-wrap">
+                        <div class="bprog-row">
+                            <div class="bprog-label">即時</div>
+                            <div class="bprog-bg"><div class="bprog-fill fill-red" style="width:42.5%"></div></div>
+                            <div class="bprog-val">42.5 %</div>
+                        </div>
+                        <div class="bprog-row">
+                            <div class="bprog-label">年度</div>
+                            <div class="bprog-bg"><div class="bprog-fill fill-green" style="width:82.2%"></div></div>
+                            <div class="bprog-val">82.2 %</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- WIDGET: 業績趨勢圖 -->
+                <div class="glass card" id="widget-chart" style="flex:1;min-width:0;">
+                    <div class="chart-header">
+                        <span style="font-size:12px;color:var(--muted)">業績趨勢</span>
+                        <div class="chart-legend">
+                            <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>總業績</div>
+                            <div class="legend-item"><div class="legend-dot" style="background:var(--accent3);border-radius:50%"></div>客單價</div>
+                            <div class="legend-item"><div class="legend-dot" style="background:var(--accent2)"></div>來客</div>
+                        </div>
+                    </div>
+                    <!-- 🔧 圖表元件放置區 -->
+                    <div id="chartdiv" style="width: 100%; height: 500px;"></div>
+                </div>
+
+            </div><!-- /bot-content -->
+
+        </div><!-- /panel-bot -->
+
+    </div><!-- /overlay -->
+
+    <script>
+        var myChart = echarts.init(document.getElementById('main'));
+        var currentMode = 'achievement'; // 預設模式
+
+        // =============================================
+        // 地圖切換設定（日後新增行政區只需擴充此物件）
+        // =============================================
+        const MAP_CONFIGS = {
+            taiwan: {
+                url: 'https://slimmay.github.io/StoresDemo/map/taiwan/twCounty.json',
+                name: 'TaiwanAll',
+                label: '全台灣'
+            },
+            taipei: {
+                url: 'https://slimmay.github.io/StoresDemo/map/taiwan/taipei_12.json',
+                name: 'TaipeiCity',
+                label: '臺北市'
+            },
+            newtaipei: {
+                url: 'https://slimmay.github.io/StoresDemo/map/taiwan/new_taipei_29.json',
+                name: 'NewTaipeiCity',
+                label: '新北市'
+            }
+            // 日後新增：
+            // taichung: { url: '...', name: 'TaichungCity', label: '臺中市' },
+            // kaohsiung: { url: '...', name: 'KaohsiungCity', label: '高雄市' },
+        };
+
+        // =============================================
+        // 門市資料（日後可用 Papa.parse 讀 Google Sheets）
+        // =============================================
+        const rawStoreData = [
+            { name: '信義黎忠', lng: 121.558000, lat: 25.020000, val: 2700, rank: 1, region: 'taipei' },
+            { name: '北投致遠', lng: 121.511466, lat: 25.117048, val: 2800, rank: 8, region: 'taipei' },
+            { name: '文山保儀', lng: 121.568447, lat: 24.988543, val: 2200, rank: 2, region: 'taipei' },
+            { name: '內湖南湖', lng: 121.613412, lat: 25.069745, val: 2340, rank: 19, region: 'taipei' },
+            { name: '內湖文德', lng: 121.583989, lat: 25.078246, val: 2830, rank: 7, region: 'taipei' },
+            { name: '板橋文化', lng: 121.460000, lat: 25.014000, val: 2100, rank: 4, region: 'newtaipei' },
+            { name: '新店三民', lng: 121.536120, lat: 24.971875, val: 2980, rank: 3, region: 'newtaipei' },
+            { name: '新莊中港', lng: 121.442000, lat: 25.051000, val: 1900, rank: 12, region: 'newtaipei' },
+            { name: '淡水漁人', lng: 121.449000, lat: 25.170000, val: 1600, rank: 22, region: 'newtaipei' }
+        ];
+
+        // =============================================
+        // 全域變數
+        // =============================================
+        var myChart = echarts.init(document.getElementById('main'));
+        var currentMode = 'achievement'; // 預設模式（保留你原本的切換邏輯）
+        var currentMapKey = 'taiwan';
+        var mapCache = {};  // GeoJSON 快取，避免重複 fetch
+
+        // =============================================
+        // 下拉選單切換（HTML 只需一個 <select>）
+        // HTML 範例：
+        // <select id="map-select" onchange="switchMap(this.value)">
+        //   <option value="taiwan">全台灣</option>
+        //   <option value="taipei">臺北市</option>
+        //   <option value="newtaipei">新北市</option>
+        // </select>
+        // =============================================
+        function switchMap(key) {
+            if (!MAP_CONFIGS[key]) return;
+            currentMapKey = key;
+            loadAndRender(key);
+        }
+
+        // =============================================
+        // 載入 GeoJSON 並渲染（含快取）
+        // =============================================
+        function loadAndRender(key) {
+            var cfg = MAP_CONFIGS[key];
+
+            function doRender(geojson) {
+                echarts.registerMap(cfg.name, geojson);
+                renderChart(key);
+            }
+
+            if (mapCache[key]) {
+                doRender(mapCache[key]);
+                return;
+            }
+
+            fetch(cfg.url)
+                .then(function (res) { return res.json(); })
+                .then(function (geojson) {
+                    mapCache[key] = geojson;
+                    doRender(geojson);
+                })
+                .catch(function (err) {
+                    console.error('地圖載入失敗：' + cfg.label, err);
+                });
+        }
+
+        // =============================================
+        // 取得對應地圖的門市資料
+        // =============================================
+        function getStoresForMap(key) {
+            if (key === 'taiwan') return rawStoreData; // 全台灣顯示全部
+            return rawStoreData.filter(function (s) { return s.region === key; });
+        }
+
+        // =============================================
+        // 渲染 ECharts（依目前 key 決定地圖與門市）
+        // =============================================
+        function renderChart(key) {
+            var cfg = MAP_CONFIGS[key];
+            var stores = getStoresForMap(key);
+
+            var option = {
+                tooltip: {
+                    trigger: 'item',
+                    backgroundColor: 'rgba(0,0,0,0.8)',
+                    textStyle: { color: '#fff' },
+                    formatter: function (params) {
+                        if (params.seriesType === 'scatter') {
+                            return '門市：' + params.name +
+                                '<br/>排名：第 ' + params.value[3] + ' 名' +
+                                '<br/>營業額：' + params.value[2] + '萬';
+                        }
+                        return params.name + '<br/>達成率：' + (params.value || 0) + '%';
+                    }
+                },
+                geo: {
+                    map: cfg.name,
+                    roam: true,
+                    itemStyle: {
+                        areaColor: '#001a33',
+                        borderColor: '#00d4ff',
+                        borderWidth: 1.5,
+                        shadowBlur: 15,
+                        shadowColor: 'rgba(0, 212, 255, 0.4)'
+                    },
+                    emphasis: {
+                        itemStyle: { areaColor: '#003366' },
+                        label: { show: true, color: '#00d4ff' }
+                    },
+                    label: {
+                        show: (key !== 'taiwan'), // 全台灣不顯示區名（太擠），縣市圖才顯示
+                        color: '#00d4ff',
+                        fontSize: 10
+                    }
+                },
+                series: [
+                    {
+                        // 地圖著色層（達成率）
+                        type: 'map',
+                        map: cfg.name,
+                        geoIndex: 0,
+                        data: getAreaDataForMap(key)
+                    },
+                    {
+                        // 門市散點層
+                        name: '門市標註',
+                        type: 'scatter',
+                        coordinateSystem: 'geo',
+                        symbol: 'pin',
+                        data: stores.map(function (item) {
+                            return {
+                                name: item.name,
+                                value: [item.lng, item.lat, item.val, item.rank],
+                                symbolSize: item.rank <= 10 ? 50 : 30,
+                                itemStyle: {
+                                    color: item.rank <= 10 ? '#ff4444' : '#00d4ff'
+                                },
+                                label: {
+                                    show: item.rank <= 32,
+                                    formatter: '{@[3]}',
+                                    color: '#fff'
+                                }
+                            };
+                        }),
+                        zlevel: 2
+                    }
+                ]
+            };
+
+            myChart.setOption(option, true); // true = 完全覆寫，避免殘留舊地圖
+        }
+
+        // =============================================
+        // 各地圖的行政區達成率資料
+        // =============================================
+        function getAreaDataForMap(key) {
+            var areaDataMap = {
+                taiwan: [
+                    { name: '臺北市', value: 800 }, { name: '新北市', value: 750 },
+                    { name: '桃園市', value: 620 }, { name: '臺中市', value: 700 },
+                    { name: '臺南市', value: 580 }, { name: '高雄市', value: 680 }
+                ],
+                taipei: [
+                    { name: '北投區', value: 100 }, { name: '士林區', value: 210 },
+                    { name: '內湖區', value: 158 }, { name: '松山區', value: 620 },
+                    { name: '中山區', value: 800 }, { name: '大同區', value: 205 },
+                    { name: '萬華區', value: 700 }, { name: '中正區', value: 620 },
+                    { name: '大安區', value: 730 }, { name: '信義區', value: 800 },
+                    { name: '南港區', value: 205 }, { name: '文山區', value: 700 }
+                ],
+                newtaipei: [
+                    { name: '板橋區', value: 820 }, { name: '三重區', value: 680 },
+                    { name: '中和區', value: 590 }, { name: '永和區', value: 530 },
+                    { name: '新莊區', value: 710 }, { name: '新店區', value: 460 },
+                    { name: '樹林區', value: 370 }, { name: '鶯歌區', value: 250 },
+                    { name: '三峽區', value: 290 }, { name: '淡水區', value: 410 }
+                ]
+            };
+            return areaDataMap[key] || [];
+        }
+
+        // =============================================
+        // 模式切換（保留你原本的邏輯）
+        // =============================================
+        function updateMode(mode) {
+            currentMode = mode;
+            $('.menu-btn').removeClass('active');
+            $('button[onclick="updateMode(\'' + mode + '\')"]').addClass('active');
+            console.log('切換至：' + mode);
+            renderChart(currentMapKey); // 切換模式也重新渲染
+        }
+
+        // =============================================
+        // Tab 切換
+        // =============================================
+        function switchTab(el) {
+            el.closest('.tabs').querySelectorAll('.tab').forEach(function (t) {
+                t.classList.remove('active');
+            });
+            el.classList.add('active');
+        }
+
+        // =============================================
+        // 底部面板 Collapse
+        // =============================================
+        function toggleBot() {
+            var panel = document.getElementById('panel-bot');
+            panel.classList.toggle('collapsed');
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'b' || e.key === 'B') toggleBot();
+        });
+
+        // =============================================
+        // RWD resize
+        // =============================================
+        window.addEventListener('resize', function () { myChart.resize(); });
+
+        // =============================================
+        // 初始化：載入預設地圖
+        // =============================================
+        loadAndRender('taiwan');
+    </script>
+    <script>
+        /* ── Tab 切換 ── */
+        function switchTab(el) {
+            el.closest('.tabs').querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+        }
+
+        /* ── 底部面板 Collapse ── */
+        function toggleBot() {
+            const panel = document.getElementById('panel-bot');
+            panel.classList.toggle('collapsed');
+        }
+        /* 鍵盤快捷鍵：B 鍵展開/收合 */
+        document.addEventListener('keydown', e => {
+            if (e.key === 'b' || e.key === 'B') toggleBot();
+        });
+
+        
+
+    </script>
+
+</body>
+</html>
