@@ -3,7 +3,7 @@
 // ==============================
 
 var myChart = echarts.init(
-document.getElementById('main')
+    document.getElementById('main')
 );
 
 
@@ -22,12 +22,12 @@ async function loadTaiwan(){
 
     const geojson =
     await fetch(
-    'https://slimmay.github.io/StoresDemo/map/taiwan/twCounty.json'
+        'https://slimmay.github.io/StoresDemo/map/taiwan/twCounty.json'
     ).then(res => res.json());
 
     echarts.registerMap(
-    'Taiwan',
-    geojson
+        'Taiwan',
+        geojson
     );
 
     renderMap('Taiwan');
@@ -43,15 +43,36 @@ async function loadTaipei(){
 
     const geojson =
     await fetch(
-    'https://slimmay.github.io/StoresDemo/map/taiwan/taipei_12.json'
+        'https://slimmay.github.io/StoresDemo/map/taiwan/taipei_12.json'
     ).then(res => res.json());
 
     echarts.registerMap(
-    'Taipei',
-    geojson
+        'Taipei',
+        geojson
     );
 
     renderMap('Taipei');
+
+}
+
+
+// ==============================
+// 載入新北市
+// ==============================
+
+async function loadNewTaipei(){
+
+    const geojson =
+    await fetch(
+        'https://slimmay.github.io/StoresDemo/map/taiwan/newtaipei.json' // ← 請換成你實際的 GeoJSON 路徑
+    ).then(res => res.json());
+
+    echarts.registerMap(
+        'NewTaipei',
+        geojson
+    );
+
+    renderMap('NewTaipei');
 
 }
 
@@ -112,11 +133,11 @@ function renderMap(mapName){
 // ==============================
 
 const SpeechRecognition =
-window.SpeechRecognition ||
-window.webkitSpeechRecognition;
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
 
 const recognition =
-new SpeechRecognition();
+    new SpeechRecognition();
 
 recognition.lang = 'zh-TW';
 
@@ -130,10 +151,10 @@ recognition.interimResults = false;
 // ==============================
 
 const voiceBtn =
-document.getElementById("voiceBtn");
+    document.getElementById("voiceBtn");
 
 const voiceStatus =
-document.getElementById("voiceStatus");
+    document.getElementById("voiceStatus");
 
 
 // ==============================
@@ -145,7 +166,7 @@ voiceBtn.onclick = () => {
     recognition.start();
 
     voiceStatus.innerHTML =
-    "🎤 Listening...";
+        "🎤 Listening...";
 
 };
 
@@ -158,14 +179,14 @@ recognition.onresult =
 function(event){
 
     const text =
-    event.results[
-        event.results.length - 1
-    ][0].transcript;
+        event.results[
+            event.results.length - 1
+        ][0].transcript;
 
     console.log("你說:", text);
 
     voiceStatus.innerHTML =
-    "✅ " + text;
+        "✅ " + text;
 
     parseVoice(text);
 
@@ -179,21 +200,20 @@ function(event){
 function parseVoice(text){
 
     // 去除空白
-    text = text.replace(/\s/g,'');
+    text = text.replace(/\s/g, '');
+
+    console.log("解析指令:", text);
 
 
     // ==========================
-    // 台灣
+    // 新北市（需在台北市之前判斷）
     // ==========================
 
-    if(
-        text.includes("台灣") ||
-        text.includes("臺灣")
-    ){
+    if( text.includes("新北市") ){
 
-        console.log("切換台灣");
+        console.log("切換新北市");
 
-        loadTaiwan();
+        loadNewTaipei();
 
         return;
 
@@ -219,12 +239,30 @@ function parseVoice(text){
 
 
     // ==========================
+    // 台灣（放台北市之後，避免誤判）
+    // ==========================
+
+    if(
+        text.includes("台灣") ||
+        text.includes("臺灣")
+    ){
+
+        console.log("切換台灣");
+
+        loadTaiwan();
+
+        return;
+
+    }
+
+
+    // ==========================
     // 北二處
     // ==========================
 
-    if(text.includes("北二處")){
+    if( text.includes("北二處") ){
 
-        console.log("北二處");
+        console.log("切換北二處");
 
         loadTaiwan();
 
@@ -232,7 +270,7 @@ function parseVoice(text){
 
             highlightNorth2();
 
-        },500);
+        }, 500);
 
         return;
 
