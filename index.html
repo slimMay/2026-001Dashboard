@@ -12,6 +12,7 @@
     <script src="https://www.amcharts.com/lib/3/themes/dark.js"></script>
     <script src="https://www.amcharts.com/lib/3/plugins/responsive/responsive.min.js"></script>
 
+
     <script src="./js/amCharts.js"></script>
     <link rel="stylesheet" href="./css/dashboard.css">
     <link rel="stylesheet" href="./css/amCharts.css">
@@ -21,10 +22,16 @@
     <!-- ══════════════════════════════════════════
          底層：地圖（全螢幕，可拖移/縮放）
     ══════════════════════════════════════════ -->
+    <!-- 按鈕獨立在地圖之外 -->
+    <div id="voice-panel">
+        <button id="voiceBtn">🎤 語音控制</button>
+        <div id="voiceStatus">🎤 待命中</div>
+    </div>
+
     <div id="map-layer">
+
         <div id="map-inner">
-            <button id="voiceBtn">🎤 語音控制</button>
-            <div id="voiceStatus">🎤 待命中</div>
+
             <div id="main"></div>
         </div>
     </div>
@@ -43,7 +50,7 @@
         <div class="panel-left">
 
             <!-- WIDGET: 城市標題 / 標籤 / 總業績 -->
-            <div class="glass card" id="widget-header">
+            <div class="glass card" id="widget-header" style="margin-top:30px;">
                 <div class="city-title">台北市 即時數據</div>
                 <div class="tabs">
                     <button class="tab active" onclick="switchTab(this)">達成率</button>
@@ -200,7 +207,7 @@
             </div>
 
             <!-- ── 可收合內容區 ── -->
-            <div id="bot-content" style="height: 550px;">
+            <div id="bot-content" >
 
                 <!-- WIDGET: KPI + 進度條 -->
                 <div class="glass card" id="widget-kpi">
