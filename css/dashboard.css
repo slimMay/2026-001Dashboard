@@ -43,6 +43,11 @@ html, body {
     z-index: 1;
 }
 
+#voice-panel {
+    position: relative;
+    z-index: 10;
+}
+
 /* ════════════════════════════════════════
            浮層 — pointer-events: none (穿透底層地圖)
            子元件個別開啟 pointer-events: all
@@ -606,6 +611,15 @@ html, body {
         overflow: auto;
     }
 
+        #main {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100% !important;   /* 蓋掉 100vw */
+        height: 100% !important;  /* 蓋掉 100vh */
+        z-index: 1;
+    }
+
     /* 地圖底層縮回正常流（不 fixed，嵌入頁面頂部） */
     #map-layer {
         position: relative;
@@ -613,7 +627,7 @@ html, body {
         height: 56vw; /* 維持地圖比例 */
         min-height: 220px;
         max-height: 320px;
-        z-index: 0;
+        z-index: 1;
     }
     /* 縮放按鈕固定在地圖右下 */
     .map-controls {
@@ -681,6 +695,7 @@ html, body {
         font-size: 14px;
     }
 }
+
 
 
 
