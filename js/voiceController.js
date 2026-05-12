@@ -197,85 +197,48 @@ function(event){
 // 指令解析
 // ==============================
 
-function parseVoice(text){
+function parseVoice(text) {
 
-    // 去除空白
     text = text.replace(/\s/g, '');
 
     console.log("解析指令:", text);
 
-
     // ==========================
-    // 新北市（需在台北市之前判斷）
+    // 新北市（要在台北市之前判斷，避免「新北市」被其他條件吃掉）
     // ==========================
-
-    if( text.includes("新北市") ){
-
+    if (text.includes("新北市")) {
         console.log("切換新北市");
-
-        loadNewTaipei();
-
+        loadNewTaipei(); // ← 你需要新增這個 function
         return;
-
     }
-
 
     // ==========================
     // 台北市
     // ==========================
-
-    if(
-        text.includes("台北市") ||
-        text.includes("臺北市")
-    ){
-
+    if (text.includes("台北市") || text.includes("臺北市")) {
         console.log("切換台北市");
-
         loadTaipei();
-
         return;
-
     }
 
-
     // ==========================
-    // 台灣（放台北市之後，避免誤判）
+    // 台灣（放最後，避免誤判）
     // ==========================
-
-    if(
-        text.includes("台灣") ||
-        text.includes("臺灣")
-    ){
-
+    if (text.includes("台灣") || text.includes("臺灣")) {
         console.log("切換台灣");
-
         loadTaiwan();
-
         return;
-
     }
-
 
     // ==========================
     // 北二處
     // ==========================
-
-    if( text.includes("北二處") ){
-
-        console.log("切換北二處");
-
+    if (text.includes("北二處")) {
+        console.log("北二處");
         loadTaiwan();
-
-        setTimeout(()=>{
-
-            highlightNorth2();
-
-        }, 500);
-
+        setTimeout(() => { highlightNorth2(); }, 500);
         return;
-
     }
-
 }
 
 
