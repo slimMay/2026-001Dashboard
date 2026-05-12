@@ -4,7 +4,6 @@
     --accent3: #ffcc44;
     --txt: #e8e4ff;
     --muted: rgba(180,172,230,0.65);
-    /* ★ 調這兩個 CSS 變數控制玻璃透明度 ★ */
     --glass-bg: rgba(18, 14, 44, 0.22);
     --glass-bg2: rgba(12, 10, 32, 0.32);
     --glass-blur: blur(18px);
@@ -31,15 +30,21 @@ html, body {
 
 
 /* ════════════════════════════════════════
-           底層：地圖全螢幕
-        ════════════════════════════════════════ */
+   底層：地圖全螢幕
+   ════════════════════════════════════════ */
+
+#map-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+}
 
 #main {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
+    width: 100%;
+    height: 100%;
     z-index: 1;
 }
 
@@ -48,18 +53,20 @@ html, body {
     z-index: 10;
 }
 
+
 /* ════════════════════════════════════════
-           浮層 — pointer-events: none (穿透底層地圖)
-           子元件個別開啟 pointer-events: all
-        ════════════════════════════════════════ */
+   浮層 — pointer-events: none (穿透底層地圖)
+   子元件個別開啟 pointer-events: all
+   ════════════════════════════════════════ */
+
 #overlay {
     position: fixed;
     inset: 0;
     z-index: 10;
     pointer-events: none;
     display: grid;
-    /*grid-template-columns: 300px 1fr 320px;*/
-    grid-template-columns: 620px 1fr 620px;
+    /* 左右面板固定寬，中間欄是地圖穿透區 */
+    grid-template-columns: 300px 1fr 340px;
     grid-template-rows: 1fr auto;
     grid-template-areas:
         "left  mid  right"
@@ -68,15 +75,17 @@ html, body {
     padding: 12px;
 }
 
-/* 中央欄完全穿透 */
+/* 中央欄完全穿透（地圖可見區） */
 .mid-pass {
     grid-area: mid;
     pointer-events: none;
 }
 
+
 /* ════════════════════════════════════════
-           玻璃卡片
-        ════════════════════════════════════════ */
+   玻璃卡片
+   ════════════════════════════════════════ */
+
 .glass {
     background: var(--glass-bg);
     backdrop-filter: var(--glass-blur);
@@ -84,7 +93,7 @@ html, body {
     border: 1px solid var(--glass-border);
     border-radius: var(--radius);
     box-shadow: inset 0 1px 0 var(--glass-shine), 0 4px 24px rgba(0,0,0,0.35);
-    pointer-events: all; /* 開啟互動 */
+    pointer-events: all;
 }
 
 .card {
@@ -100,7 +109,9 @@ html, body {
     justify-content: space-between;
 }
 
+
 /* ════ 左側面板 ════ */
+
 .panel-left {
     grid-area: left;
     display: flex;
@@ -112,7 +123,6 @@ html, body {
     scrollbar-color: rgba(120,100,255,0.10) transparent;
 }
 
-/* widget-header */
 #widget-header .city-title {
     font-size: 16px;
     font-weight: 700;
@@ -138,12 +148,12 @@ html, body {
     font-family: var(--font);
 }
 
-    #widget-header .tab.active {
-        background: var(--accent);
-        color: #0d0b22;
-        border-color: var(--accent);
-        font-weight: 700;
-    }
+#widget-header .tab.active {
+    background: var(--accent);
+    color: #0d0b22;
+    border-color: var(--accent);
+    font-weight: 700;
+}
 
 .total-row {
     font-size: 13px;
@@ -156,7 +166,6 @@ html, body {
     font-weight: 700;
 }
 
-/* placeholder */
 .placeholder {
     display: flex;
     align-items: center;
@@ -169,7 +178,6 @@ html, body {
     margin-top: 4px;
 }
 
-/* progress bars */
 .prog-row {
     display: flex;
     align-items: center;
@@ -198,13 +206,8 @@ html, body {
     background: var(--accent);
 }
 
-    .prog-bar.warn {
-        background: var(--accent3);
-    }
-
-    .prog-bar.danger {
-        background: var(--accent2);
-    }
+.prog-bar.warn  { background: var(--accent3); }
+.prog-bar.danger { background: var(--accent2); }
 
 .prog-val {
     font-size: 11px;
@@ -214,7 +217,9 @@ html, body {
     flex-shrink: 0;
 }
 
+
 /* ════ 右側面板 ════ */
+
 .panel-right {
     grid-area: right;
     display: flex;
@@ -226,7 +231,6 @@ html, body {
     scrollbar-color: rgba(120,100,255,0.10) transparent;
 }
 
-/* search */
 #widget-search input {
     width: 100%;
     background: rgba(255,255,255,0.07);
@@ -239,20 +243,14 @@ html, body {
     font-family: var(--font);
 }
 
-    #widget-search input::placeholder {
-        color: var(--muted);
-    }
+#widget-search input::placeholder { color: var(--muted); }
+#widget-search input:focus { border-color: var(--accent); }
 
-    #widget-search input:focus {
-        border-color: var(--accent);
-    }
-
-/* ranking table */
 #widget-ranking table {
     width: 100%;
     border-collapse: collapse;
     font-size: 16px;
-    overflow: clip; /* 加這一行 */
+    overflow: clip;
 }
 
 #widget-ranking thead th {
@@ -263,7 +261,6 @@ html, body {
     border-bottom: 1px solid rgba(120,100,255,0.15);
     white-space: nowrap;
 }
-
 
 #widget-ranking tbody tr:hover {
     background: rgba(140,120,255,0.52);
@@ -280,10 +277,8 @@ html, body {
 #widget-ranking tbody td:hover:before {
     content: "";
     position: absolute;
-    left: 0;
-    right: 0;
-    top: -9999px;
-    bottom: -9999px;
+    left: 0; right: 0;
+    top: -9999px; bottom: -9999px;
     background-color: rgba(140,120,255,0.32);
     z-index: -1;
 }
@@ -293,25 +288,26 @@ html, body {
     font-size: 11px;
 }
 
-    .rank-no.top3 {
-        color: var(--accent3);
-        font-weight: 700;
-    }
+.rank-no.top3 {
+    color: var(--accent3);
+    font-weight: 700;
+}
 
 .val-col {
     color: var(--accent);
     font-size: 10px;
 }
 
+
 /* ════ 底部面板 ════ */
+
 .panel-bot {
     grid-area: bot;
     display: flex;
     gap: 9px;
-    flex-direction: column; /* 包含 toggle bar + content row */
+    flex-direction: column;
 }
 
-/* ── Collapse toggle bar ── */
 #bot-toggle-bar {
     pointer-events: all;
     display: flex;
@@ -329,44 +325,43 @@ html, body {
     transition: background .15s;
 }
 
-    #bot-toggle-bar:hover {
-        background: rgba(30,24,60,0.90);
-    }
+#bot-toggle-bar:hover {
+    background: rgba(30,24,60,0.90);
+}
 
-    #bot-toggle-bar .toggle-left {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 22px;
-        color: var(--muted);
-    }
+#bot-toggle-bar .toggle-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 22px;
+    color: var(--muted);
+}
 
-    #bot-toggle-bar .toggle-title {
-        font-size: 20px;
-        font-weight: 500;
-        color: var(--txt);
-    }
+#bot-toggle-bar .toggle-title {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--txt);
+}
 
-    #bot-toggle-bar .toggle-pills {
-        display: flex;
-        gap: 6px;
-    }
+#bot-toggle-bar .toggle-pills {
+    display: flex;
+    gap: 6px;
+}
 
-    #bot-toggle-bar .pill {
-        font-size: 18px;
-        padding: 2px 8px;
-        border-radius: 3px;
-        border: 1px solid var(--glass-border);
-        color: var(--muted);
-        background: rgba(255,255,255,0.04);
-    }
+#bot-toggle-bar .pill {
+    font-size: 18px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    border: 1px solid var(--glass-border);
+    color: var(--muted);
+    background: rgba(255,255,255,0.04);
+}
 
-        #bot-toggle-bar .pill.accent {
-            color: var(--accent);
-            border-color: rgba(79,216,196,0.3);
-        }
+#bot-toggle-bar .pill.accent {
+    color: var(--accent);
+    border-color: rgba(79,216,196,0.3);
+}
 
-/* 箭頭圖示 */
 #bot-chevron {
     font-size: 20px;
     color: var(--muted);
@@ -374,32 +369,27 @@ html, body {
     line-height: 1;
 }
 
-/* ── Content row（可展開/收合）── */
 #bot-content {
     display: flex;
     gap: 9px;
     overflow: hidden;
-    /* 展開狀態：max-height 留夠大的值；收合時降到 0 */
     max-height: 550px;
     opacity: 1;
     transition: max-height .35s cubic-bezier(.4,0,.2,1), opacity .25s ease, margin-top .35s ease;
     margin-top: 0;
 }
 
-/* 收合狀態 */
 .panel-bot.collapsed #bot-content {
     max-height: 0;
     opacity: 0;
-    margin-top: -9px; /* 補回 gap */
+    margin-top: -9px;
     pointer-events: none;
 }
 
-/* 箭頭旋轉 */
 .panel-bot.collapsed #bot-chevron {
     transform: rotate(180deg);
 }
 
-/* KPI */
 #widget-kpi {
     flex: 0 0 auto;
     min-width: 250px;
@@ -431,13 +421,8 @@ html, body {
     color: var(--accent2);
 }
 
-    .s-val.teal {
-        color: var(--accent);
-    }
-
-    .s-val.yellow {
-        color: var(--accent3);
-    }
+.s-val.teal   { color: var(--accent); }
+.s-val.yellow { color: var(--accent3); }
 
 .s-unit {
     font-size: 14px;
@@ -445,7 +430,6 @@ html, body {
     margin-left: 1px;
 }
 
-/* 即時/年度進度條 */
 .bprog-wrap {
     margin-top: 10px;
     display: flex;
@@ -479,13 +463,8 @@ html, body {
     border-radius: 4px;
 }
 
-.fill-red {
-    background: linear-gradient(90deg,#f7688a,#e09020);
-}
-
-.fill-green {
-    background: linear-gradient(90deg,#4fd8c4,#30e060);
-}
+.fill-red   { background: linear-gradient(90deg,#f7688a,#e09020); }
+.fill-green { background: linear-gradient(90deg,#4fd8c4,#30e060); }
 
 .bprog-val {
     font-size: 11px;
@@ -495,7 +474,6 @@ html, body {
     flex-shrink: 0;
 }
 
-/* chart */
 #widget-chart {
     flex: 1;
     min-width: 0;
@@ -556,7 +534,6 @@ html, body {
     color: var(--muted);
 }
 
-/* live badge */
 .live-badge {
     background: rgba(79,216,196,0.1);
     border: 1px solid var(--accent);
@@ -569,71 +546,126 @@ html, body {
     gap: 4px;
 }
 
-    .live-badge::before {
-        content: '';
-        width: 5px;
-        height: 5px;
-        border-radius: 50%;
-        background: var(--accent);
-        animation: blink 1.4s ease-in-out infinite;
-    }
+.live-badge::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: blink 1.4s ease-in-out infinite;
+}
 
 @keyframes blink {
-    0%,100% {
-        opacity: 1
-    }
+    0%,100% { opacity: 1; }
+    50%      { opacity: .15; }
+}
 
-    50% {
-        opacity: .15
+
+/* ════════════════════════════════════════
+   RWD — 寬螢幕 ≥ 1400px（左右欄可略寬）
+   ════════════════════════════════════════ */
+
+@media (min-width: 1400px) {
+    #overlay {
+        grid-template-columns: 520px 1fr 550px;
     }
 }
 
-/* ════ RWD — 平板 ≤ 1100px ════ */
-@media (max-width: 1100px) {
+
+/* ════════════════════════════════════════
+   RWD — 平板橫式 ≤ 1280px
+   左右欄縮窄，地圖中間欄自動變寬
+   ════════════════════════════════════════ */
+
+@media (max-width: 1280px) {
     #overlay {
-        grid-template-columns: 260px 1fr;
-        grid-template-rows: 1fr auto;
+        grid-template-columns: 300px 1fr 360px;
         grid-template-areas:
-            "left  right"
+            "left  mid  right"
+            "bot   bot  bot";
+    }
+}
+
+
+/* ════════════════════════════════════════
+   RWD — 平板直式 ≤ 1024px
+   右欄收起，左欄 + 地圖
+   ════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+    #overlay {
+        grid-template-columns: 240px 1fr;
+        grid-template-areas:
+            "left  mid"
             "bot   bot";
     }
 
+    .panel-right {
+        display: none; /* 右欄隱藏，需要時可改成抽屜 */
+    }
+
     .mid-pass {
-        display: none;
+        display: block; /* 中間欄繼續穿透 */
     }
 }
 
-/* ════ RWD — 手機 ≤ 680px ════ */
+
+/* ════════════════════════════════════════
+   RWD — 小平板 ≤ 820px
+   左欄更窄
+   ════════════════════════════════════════ */
+
+@media (max-width: 820px) {
+    #overlay {
+        grid-template-columns: 200px 1fr;
+        padding: 8px;
+        gap: 8px;
+    }
+}
+
+
+/* ════════════════════════════════════════
+   RWD — 手機 ≤ 680px
+   地圖獨立區塊，面板垂直捲動
+   ════════════════════════════════════════ */
+
 @media (max-width: 680px) {
 
-    /* 手機改為正常文件流，讓內容可以捲動 */
+    /* 允許捲動 */
     html, body {
         overflow: auto;
+        height: auto;
     }
 
-        #main {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100% !important;   /* 蓋掉 100vw */
-        height: 100% !important;  /* 蓋掉 100vh */
-        z-index: 1;
-    }
-
-    /* 地圖底層縮回正常流（不 fixed，嵌入頁面頂部） */
+    /* 地圖獨立一塊，正常文件流 */
     #map-layer {
         position: relative;
         width: 100%;
-        height: 90vw; /* 維持地圖比例 */
+        height: 90vw;
         min-height: 220px;
         max-height: 400px;
+        overflow: hidden;
+        z-index: 1;
+        /* fixed 取消 */
+        inset: unset;
+    }
+
+    /* #main 跟著 map-layer 尺寸走 */
+    #main {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100% !important;
+        height: 100% !important;
         z-index: 1;
     }
+
     /* 縮放按鈕固定在地圖右下 */
     .map-controls {
         position: absolute;
         bottom: 10px;
         right: 10px;
+        z-index: 5;
     }
 
     /* overlay 改成正常流、單欄、可捲動 */
@@ -647,17 +679,21 @@ html, body {
         flex-direction: column;
         gap: 8px;
         padding: 8px;
-        /* 清除桌面 grid 設定 */
         grid-template-columns: unset;
         grid-template-rows: unset;
         grid-template-areas: unset;
     }
 
-    /* 所有面板改成全寬，恢復正常高度 */
+    /* 所有面板全寬 */
     .panel-left,
     .panel-right {
         max-height: none;
         overflow: visible;
+    }
+
+    /* 右側面板在手機重新顯示（放到左側下方） */
+    .panel-right {
+        display: flex;
     }
 
     /* 底部面板垂直排列 */
@@ -667,12 +703,12 @@ html, body {
 
     #bot-content {
         flex-direction: column;
-        max-height: 1000px;
+        max-height: none;
     }
 
     #widget-kpi {
-        /*min-width: unset;*/
-       width: 410px;
+        width: 100%;
+        min-width: unset;
     }
 
     /* Toggle bar pills 手機自動換行 */
@@ -682,10 +718,10 @@ html, body {
     }
 
     #bot-toggle-bar .toggle-title {
-        font-size: 11px;
+        font-size: 14px;
     }
 
-    /* KPI 3欄 → 手機保持3欄但字縮小 */
+    /* KPI 3欄字縮小 */
     .stats-mini {
         grid-template-columns: repeat(3,1fr);
         gap: 5px;
@@ -694,10 +730,16 @@ html, body {
     .s-val {
         font-size: 14px;
     }
+
+    .s-label {
+        font-size: 11px;
+    }
 }
 
 
-
+/* ════════════════════════════════════════
+   Scrollbar
+   ════════════════════════════════════════ */
 
 ::-webkit-scrollbar {
     width: 3px;
