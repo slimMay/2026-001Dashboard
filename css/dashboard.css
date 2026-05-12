@@ -624,9 +624,9 @@ html, body {
     #map-layer {
         position: relative;
         width: 100%;
-        height: 56vw; /* 維持地圖比例 */
+        height: 90vw; /* 維持地圖比例 */
         min-height: 220px;
-        max-height: 320px;
+        max-height: 400px;
         z-index: 1;
     }
     /* 縮放按鈕固定在地圖右下 */
