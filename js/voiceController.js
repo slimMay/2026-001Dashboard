@@ -64,7 +64,7 @@ async function loadNewTaipei(){
 
     const geojson =
     await fetch(
-        'https://slimmay.github.io/StoresDemo/map/taiwan/newtaipei.json' // ← 請換成你實際的 GeoJSON 路徑
+        'https://slimmay.github.io/StoresDemo/map/taiwan/new_taipei_29.json' // ← 請換成你實際的 GeoJSON 路徑
     ).then(res => res.json());
 
     echarts.registerMap(
