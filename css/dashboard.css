@@ -677,6 +677,7 @@ html, body {
         min-height: 220px;
         max-height: 400px;
         overflow: hidden;
+        touch-action: none; /* ✅ 阻止瀏覽器接管手勢 */
         z-index: 1;
         /* fixed 取消 */
         inset: unset;
