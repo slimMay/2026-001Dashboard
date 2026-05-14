@@ -94,8 +94,8 @@
         // 渲染
         // 用 setTimeout 確保 bprog-wrap 已有實際尺寸
 setTimeout(() => {
-    const yearChart = createGaugeOption('chart-year', '年度完成率', 65.33, '#00f2ff');
-    const dayChart  = createGaugeOption('chart-day',  '今日完成率', 48.33, '#ff2d55');
+    const yearChart = createGaugeOption('chart-year', '年度累計', 65.33, '#00f2ff');
+    const dayChart  = createGaugeOption('chart-day',  '今日即時', 48.33, '#ff2d55');
 }, 100);
 
         const resizeObserver = new ResizeObserver(() => {
