@@ -435,7 +435,7 @@ html, body {
  .dashboard-container {
     display: flex;
     flex-wrap: wrap;
-    width: 98%;        /* ← 撐滿父容器 */
+    width: 95%;        /* ← 撐滿父容器 */
     left:-10px;
 }
 
