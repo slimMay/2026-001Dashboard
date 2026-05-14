@@ -6,6 +6,7 @@
     <title>台北市 即時數據</title>
     <script src="https://fastly.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
     <script src="https://fastly.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <script src="https://www.amcharts.com/lib/3/amcharts.js"></script>
     <script src="https://www.amcharts.com/lib/3/serial.js"></script>
@@ -14,6 +15,7 @@
     
 
     <script src="./js/amCharts.js"></script>
+    <script src="./js/echarts-002.js"></script>
     <link rel="stylesheet" href="./css/dashboard.css">
     <link rel="stylesheet" href="./css/amCharts.css">
 
@@ -140,7 +142,9 @@
                     <span style="font-size:16px;color:var(--muted);cursor:pointer">⋮</span>
                 </div>
                 <!-- 🔧 替換成你的元件 -->
-                <div class="placeholder" style="height:90px">元件放置區 A</div>
+                <div class="placeholder" style="height:90px">元件放置區 A
+                </div>
+
             </div>
 
         </div><!-- /panel-left -->
@@ -231,18 +235,11 @@
                         </div>
                     </div>
                     <div class="bprog-wrap">
-                        <div class="bprog-row">
-                            <div class="bprog-label">即時</div>
-                            <div class="bprog-bg"><div class="bprog-fill fill-red" style="width:42.5%"></div></div>
-                            <div class="bprog-val">42.5 %</div>
+                        <div class="dashboard-container">
+                            <div id="chart-year" class="chart-box"></div>
+                            <div id="chart-day" class="chart-box"></div>
+                         </div>
                         </div>
-                        <div class="bprog-row">
-                            <div class="bprog-label">年度</div>
-                            <div class="bprog-bg"><div class="bprog-fill fill-green" style="width:82.2%"></div></div>
-                            <div class="bprog-val">82.2 %</div>
-                        </div>
-                          
-                    </div>
                 </div>
 
                 <!-- WIDGET: 業績趨勢圖 -->
@@ -537,6 +534,11 @@
 
 
     </script>
+
+
+
     <script src="js/voiceController.js"></script>
+
+
 </body>
 </html>
