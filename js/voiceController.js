@@ -1,25 +1,30 @@
 // ==============================
-// ECharts 初始化
+// voiceController.js
+// 地圖渲染完全交給 HTML 裡的 renderChart(key)
+// 這裡只負責：快取、語音、縮放
 // ==============================
-
-var myChart = echarts.init(
-    document.getElementById('main')
-);
 
 
 // ==============================
-// GeoJSON 快取（避免重複下載）
+// GeoJSON 快取 + 地圖切換
+// 呼叫 HTML 裡的 renderChart(key)
 // ==============================
 
 const geoCache = {};
 
-async function loadMapWithCache(name, url) {
-    if (!geoCache[name]) {
-        // 第一次才下載，之後直接從記憶體取用
-        geoCache[name] = await fetch(url).then(res => res.json());
-        echarts.registerMap(name, geoCache[name]);
+async function loadMapWithCache(key) {
+    const cfg = MAP_CONFIGS[key];
+    if (!cfg) return;
+
+    if (!geoCache[key]) {
+        // 第一次才下載
+        const geojson = await fetch(cfg.url).then(res => res.json());
+        echarts.registerMap(cfg.name, geojson);
+        geoCache[key] = true;
     }
-    renderMap(name);
+
+    // 交給 HTML 裡的 renderChart 渲染（保留 pin、著色層）
+    renderChart(key);
 }
 
 
@@ -28,10 +33,7 @@ async function loadMapWithCache(name, url) {
 // ==============================
 
 async function loadTaiwan() {
-    await loadMapWithCache(
-        'Taiwan',
-        'https://slimmay.github.io/StoresDemo/map/taiwan/twCounty.json'
-    );
+    await loadMapWithCache('taiwan');
 }
 
 
@@ -40,10 +42,7 @@ async function loadTaiwan() {
 // ==============================
 
 async function loadTaipei() {
-    await loadMapWithCache(
-        'Taipei',
-        'https://slimmay.github.io/StoresDemo/map/taiwan/taipei_12.json'
-    );
+    await loadMapWithCache('taipei');
 }
 
 
@@ -52,17 +51,14 @@ async function loadTaipei() {
 // ==============================
 
 async function loadNewTaipei() {
-    await loadMapWithCache(
-        'NewTaipei',
-        'https://slimmay.github.io/StoresDemo/map/taiwan/new_taipei_29.json'
-    );
+    await loadMapWithCache('newtaipei');
 }
 
 
 // ==============================
 // 頁面載入完成後：
 // 1. 顯示預設台灣地圖
-// 2. 背景預載其他地圖（加速後續切換）
+// 2. 背景預載其他地圖
 // ==============================
 
 window.addEventListener('load', () => {
@@ -70,60 +66,23 @@ window.addEventListener('load', () => {
     // 預設顯示台灣
     loadTaiwan();
 
-    // 背景靜默預載，不 await，不影響頁面速度
-    loadMapWithCache(
-        'Taipei',
-        'https://slimmay.github.io/StoresDemo/map/taiwan/taipei_12.json'
-    );
-    loadMapWithCache(
-        'NewTaipei',
-        'https://slimmay.github.io/StoresDemo/map/taiwan/new_taipei_29.json'
-    );
+    // 背景靜默預載
+    loadMapWithCache('taipei');
+    loadMapWithCache('newtaipei');
 
 });
 
 
 // ==============================
-// 地圖渲染
+// 地圖縮放（直接更新 geo zoom）
 // ==============================
 
-function renderMap(mapName) {
-
+function mapZoom(factor) {
+    const option = myChart.getOption();
+    const currentZoom = (option.geo && option.geo[0] && option.geo[0].zoom) || 1;
     myChart.setOption({
-
-        backgroundColor: '#221d4f',
-
-        tooltip: {
-            trigger: 'item'
-        },
-
-        geo: {
-
-            map: mapName,
-
-            roam: true,
-
-            itemStyle: {
-                areaColor: '#001a33',
-                borderColor: '#00d4ff',
-                borderWidth: 1.5,
-                shadowBlur: 15,
-                shadowColor: 'rgba(0,212,255,0.5)'
-            },
-
-            emphasis: {
-                itemStyle: {
-                    areaColor: '#ffe600'
-                }
-            }
-
-        }
-
+        geo: [{ zoom: currentZoom * factor }]
     });
-
-    // ECharts 重新計算容器尺寸（手機版必要）
-    setTimeout(() => { myChart.resize(); }, 100);
-
 }
 
 
@@ -201,7 +160,7 @@ function stopListening() {
 
 
 // ==============================
-// 辨識結束自動重啟（保持持續監聽）
+// 辨識結束自動重啟
 // ==============================
 
 recognition.onend = () => {
@@ -250,10 +209,8 @@ recognition.onresult = function(event) {
 recognition.onerror = function(event) {
     console.warn("語音錯誤:", event.error);
 
-    // no-speech：沒偵測到聲音，靜默重啟即可
     if (event.error === 'no-speech') return;
 
-    // 其他錯誤顯示提示
     voiceStatus.innerHTML = "⚠️ " + event.error;
     isListening = false;
 };
@@ -265,7 +222,6 @@ recognition.onerror = function(event) {
 
 function parseVoice(text) {
 
-    // 去除空白
     text = text.replace(/\s/g, '');
 
     console.log("解析指令:", text);
@@ -280,11 +236,7 @@ function parseVoice(text) {
         text.includes("zoom in")
     ) {
         console.log("地圖放大");
-        myChart.dispatchAction({
-            type: 'geoRoam',
-            geoIndex: 0,
-            zoom: 1.5
-        });
+        mapZoom(1.5);
         voiceStatus.innerHTML = "🔍 放大";
         return;
     }
@@ -299,18 +251,14 @@ function parseVoice(text) {
         text.includes("zoom out")
     ) {
         console.log("地圖縮小");
-        myChart.dispatchAction({
-            type: 'geoRoam',
-            geoIndex: 0,
-            zoom: 0.7
-        });
+        mapZoom(0.7);
         voiceStatus.innerHTML = "🔎 縮小";
         return;
     }
 
 
     // ==========================
-    // 地圖還原（回到預設視角）
+    // 地圖還原
     // ==========================
 
     if (
@@ -365,7 +313,7 @@ function parseVoice(text) {
 
 
     // ==========================
-    // 台灣（放最後，避免誤判）
+    // 台灣（放最後避免誤判）
     // ==========================
 
     if (
