@@ -7,7 +7,6 @@
 
 // ==============================
 // GeoJSON 快取 + 地圖切換
-// 呼叫 HTML 裡的 renderChart(key)
 // ==============================
 
 const geoCache = {};
@@ -17,7 +16,6 @@ async function loadMapWithCache(key) {
     if (!cfg) return;
 
     if (!geoCache[key]) {
-        // 第一次才下載
         const geojson = await fetch(cfg.url).then(res => res.json());
         echarts.registerMap(cfg.name, geojson);
         geoCache[key] = true;
@@ -29,10 +27,39 @@ async function loadMapWithCache(key) {
 
 
 // ==============================
+// 維護目前縮放狀態
+// ==============================
+
+let currentZoom = 1;
+
+
+// ==============================
+// 地圖縮放（平滑動畫版）
+// ==============================
+
+function mapZoom(factor) {
+    const steps = 3;
+    const stepFactor = Math.pow(factor, 1 / steps);
+    let step = 0;
+
+    const animate = () => {
+        if (step >= steps) return;
+        currentZoom = currentZoom * stepFactor;
+        myChart.setOption({ geo: { zoom: currentZoom } });
+        step++;
+        requestAnimationFrame(animate);
+    };
+
+    requestAnimationFrame(animate);
+}
+
+
+// ==============================
 // 載入台灣
 // ==============================
 
 async function loadTaiwan() {
+    currentZoom = 1;
     await loadMapWithCache('taiwan');
 }
 
@@ -42,6 +69,7 @@ async function loadTaiwan() {
 // ==============================
 
 async function loadTaipei() {
+    currentZoom = 1;
     await loadMapWithCache('taipei');
 }
 
@@ -51,6 +79,7 @@ async function loadTaipei() {
 // ==============================
 
 async function loadNewTaipei() {
+    currentZoom = 1;
     await loadMapWithCache('newtaipei');
 }
 
@@ -71,19 +100,6 @@ window.addEventListener('load', () => {
     loadMapWithCache('newtaipei');
 
 });
-
-
-// ==============================
-// 地圖縮放（直接更新 geo zoom）
-// ==============================
-
-function mapZoom(factor) {
-    const option = myChart.getOption();
-    const currentZoom = (option.geo && option.geo[0] && option.geo[0].zoom) || 1;
-    myChart.setOption({
-        geo: [{ zoom: currentZoom * factor }]
-    });
-}
 
 
 // ==============================
