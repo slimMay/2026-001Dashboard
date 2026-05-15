@@ -207,7 +207,6 @@ function stopListening() {
 recognition.onend = () => {
     isListening = false;
     if (voiceBtn.classList.contains('active')) {
-        // 只有在啟動狀態才自動重啟
         startListening();
     }
 };
@@ -270,6 +269,58 @@ function parseVoice(text) {
     text = text.replace(/\s/g, '');
 
     console.log("解析指令:", text);
+
+
+    // ==========================
+    // 地圖放大
+    // ==========================
+
+    if (
+        text.includes("放大") ||
+        text.includes("zoom in")
+    ) {
+        console.log("地圖放大");
+        myChart.dispatchAction({
+            type: 'geoRoam',
+            zoom: 1.5
+        });
+        voiceStatus.innerHTML = "🔍 放大";
+        return;
+    }
+
+
+    // ==========================
+    // 地圖縮小
+    // ==========================
+
+    if (
+        text.includes("縮小") ||
+        text.includes("zoom out")
+    ) {
+        console.log("地圖縮小");
+        myChart.dispatchAction({
+            type: 'geoRoam',
+            zoom: 0.7
+        });
+        voiceStatus.innerHTML = "🔎 縮小";
+        return;
+    }
+
+
+    // ==========================
+    // 地圖還原（回到預設視角）
+    // ==========================
+
+    if (
+        text.includes("還原") ||
+        text.includes("重置") ||
+        text.includes("回到全圖")
+    ) {
+        console.log("地圖還原");
+        loadTaiwan();
+        voiceStatus.innerHTML = "🗺️ 還原全圖";
+        return;
+    }
 
 
     // ==========================
