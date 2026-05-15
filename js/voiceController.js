@@ -282,6 +282,7 @@ function parseVoice(text) {
         console.log("地圖放大");
         myChart.dispatchAction({
             type: 'geoRoam',
+            geoIndex: 0,
             zoom: 1.5
         });
         voiceStatus.innerHTML = "🔍 放大";
@@ -300,6 +301,7 @@ function parseVoice(text) {
         console.log("地圖縮小");
         myChart.dispatchAction({
             type: 'geoRoam',
+            geoIndex: 0,
             zoom: 0.7
         });
         voiceStatus.innerHTML = "🔎 縮小";
