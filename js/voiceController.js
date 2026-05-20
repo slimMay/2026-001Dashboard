@@ -1,7 +1,7 @@
 // ==============================
 // voiceController.js
 // 地圖渲染完全交給 HTML 裡的 renderChart(key)
-// 這裡只負責：快取、語音、縮放
+// 這裡只負責：快取、語音、縮放、鍵盤備援
 // ==============================
 
 
@@ -379,3 +379,97 @@ function highlightRegion(regionName) {
 function highlightNorth2() {
     highlightRegion('北二處');
 }
+
+
+// ==============================
+// 鍵盤快捷鍵備援
+// 語音收音差時的替代方案
+// ==============================
+
+document.addEventListener('keydown', (e) => {
+
+    // 避免在 input 輸入框內觸發
+    if (e.target.tagName === 'INPUT') return;
+
+    switch(e.key) {
+
+        // ==========================
+        // 地圖切換
+        // ==========================
+        case '1':
+            loadTaiwan();
+            voiceStatus.innerHTML = "⌨️ 全台灣";
+            break;
+
+        case '2':
+            loadTaipei();
+            voiceStatus.innerHTML = "⌨️ 台北市";
+            break;
+
+        case '3':
+            loadNewTaipei();
+            voiceStatus.innerHTML = "⌨️ 新北市";
+            break;
+
+        case '0':
+            loadTaiwan();
+            voiceStatus.innerHTML = "⌨️ 還原全圖";
+            break;
+
+
+        // ==========================
+        // 縮放控制
+        // ==========================
+        case '+':
+        case '=': // 有些鍵盤 + 要加 shift，= 不用
+            mapZoom(1.5);
+            voiceStatus.innerHTML = "⌨️ 放大";
+            break;
+
+        case '-':
+            mapZoom(0.7);
+            voiceStatus.innerHTML = "⌨️ 縮小";
+            break;
+
+
+        // ==========================
+        // 責任區高亮
+        // ==========================
+        case 'q':
+        case 'Q':
+            loadTaiwan();
+            setTimeout(() => { highlightRegion('北一處'); }, 500);
+            voiceStatus.innerHTML = "⌨️ 北一處";
+            break;
+
+        case 'w':
+        case 'W':
+            loadTaiwan();
+            setTimeout(() => { highlightRegion('北二處'); }, 500);
+            voiceStatus.innerHTML = "⌨️ 北二處";
+            break;
+
+        case 'e':
+        case 'E':
+            loadTaiwan();
+            setTimeout(() => { highlightRegion('中區'); }, 500);
+            voiceStatus.innerHTML = "⌨️ 中區";
+            break;
+
+        case 'r':
+        case 'R':
+            loadTaiwan();
+            setTimeout(() => { highlightRegion('南一處'); }, 500);
+            voiceStatus.innerHTML = "⌨️ 南一處";
+            break;
+
+        case 't':
+        case 'T':
+            loadTaiwan();
+            setTimeout(() => { highlightRegion('南二處'); }, 500);
+            voiceStatus.innerHTML = "⌨️ 南二處";
+            break;
+
+    }
+
+});
