@@ -4,8 +4,8 @@
     --accent3: #ffcc44;
     --txt: #e8e4ff;
     --muted: rgba(180,172,230,0.65);
-    --glass-bg: rgba(18, 14, 44, 0.22);
-    --glass-bg2: rgba(12, 10, 32, 0.32);
+    --glass-bg: rgba(18, 14, 44, 0.07);
+    --glass-bg2: rgba(12, 10, 32, 0.12);
     --glass-bg3: rgba(128, 0, 128, 0.15);
     --glass-blur: blur(18px);
     --glass-border: rgba(140,120,255,0.52);
