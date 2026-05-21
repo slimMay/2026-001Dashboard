@@ -108,11 +108,15 @@ window.addEventListener('load', () => {
 // ==============================
 
 const REGIONS = {
-    '北一處': ['臺北市', '基隆市'],
-    '北二處': ['新北市', '宜蘭縣'],
-    '中區':   ['臺中市', '南投縣', '苗栗縣'],
-    '南一處': ['臺南市', '嘉義市', '嘉義縣'],
-    '南二處': ['高雄市', '屏東縣'],
+    '北一': ['臺北市'],
+    '北二': ['基隆市', '桃園市', '新北市'],
+    '桃竹': ['桃園市', '新竹市', '新竹縣'],
+    '臺中': ['臺中市', '南投縣', '台中市', '苗栗縣', '金門縣'],
+    '雲嘉': ['臺南市', '嘉義市', '雲林縣', '嘉義縣', '澎湖縣'],
+    '北三': ['新北市', '宜蘭縣', '臺東縣', '花蓮縣'],
+    '中彰': ['南投縣', '彰化縣','臺中市'],
+    '高屏': ['高雄市', '屏東縣'],
+    '南高': ['高雄市', '臺南市'],
 };
 
 
@@ -377,7 +381,7 @@ function highlightRegion(regionName) {
 // ==============================
 
 function highlightNorth2() {
-    highlightRegion('北二處');
+    highlightRegion('北二');
 }
 
 
@@ -438,36 +442,36 @@ document.addEventListener('keydown', (e) => {
         case 'q':
         case 'Q':
             loadTaiwan();
-            setTimeout(() => { highlightRegion('北一處'); }, 500);
-            voiceStatus.innerHTML = "⌨️ 北一處";
+            setTimeout(() => { highlightRegion('北一'); }, 500);
+            voiceStatus.innerHTML = "⌨️ 北一";
             break;
 
         case 'w':
         case 'W':
             loadTaiwan();
-            setTimeout(() => { highlightRegion('北二處'); }, 500);
-            voiceStatus.innerHTML = "⌨️ 北二處";
+            setTimeout(() => { highlightRegion('北二'); }, 500);
+            voiceStatus.innerHTML = "⌨️ 北二";
             break;
 
         case 'e':
         case 'E':
             loadTaiwan();
-            setTimeout(() => { highlightRegion('中區'); }, 500);
-            voiceStatus.innerHTML = "⌨️ 中區";
+            setTimeout(() => { highlightRegion('台中'); }, 500);
+            voiceStatus.innerHTML = "⌨️ 台中";
             break;
 
         case 'r':
         case 'R':
             loadTaiwan();
-            setTimeout(() => { highlightRegion('南一處'); }, 500);
-            voiceStatus.innerHTML = "⌨️ 南一處";
+            setTimeout(() => { highlightRegion('南高'); }, 500);
+            voiceStatus.innerHTML = "⌨️ 南高";
             break;
 
         case 't':
         case 'T':
             loadTaiwan();
-            setTimeout(() => { highlightRegion('南二處'); }, 500);
-            voiceStatus.innerHTML = "⌨️ 南二處";
+            setTimeout(() => { highlightRegion('桃竹'); }, 500);
+            voiceStatus.innerHTML = "⌨️ 桃竹";
             break;
 
     }
