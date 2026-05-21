@@ -108,15 +108,15 @@ window.addEventListener('load', () => {
 // ==============================
 
 const REGIONS = {
-    '北一': ['臺北市'],
-    '北二': ['基隆市', '桃園市', '新北市'],
-    '桃竹': ['桃園市', '新竹市', '新竹縣'],
-    '臺中': ['臺中市', '南投縣', '台中市', '苗栗縣', '金門縣'],
-    '雲嘉': ['臺南市', '嘉義市', '雲林縣', '嘉義縣', '澎湖縣'],
-    '北三': ['新北市', '宜蘭縣', '臺東縣', '花蓮縣'],
-    '中彰': ['南投縣', '彰化縣','臺中市'],
-    '高屏': ['高雄市', '屏東縣'],
-    '南高': ['高雄市', '臺南市'],
+    '北一處': ['臺北市'],
+    '北二處': ['基隆市', '桃園市', '新北市'],
+    '桃竹處': ['桃園市', '新竹市', '新竹縣'],
+    '臺中處': ['臺中市', '南投縣', '台中市', '苗栗縣', '金門縣'],
+    '雲嘉處': ['臺南市', '嘉義市', '雲林縣', '嘉義縣', '澎湖縣'],
+    '北三處': ['新北市', '宜蘭縣', '臺東縣', '花蓮縣'],
+    '中彰處': ['南投縣', '彰化縣','臺中市'],
+    '高屏處': ['高雄市', '屏東縣'],
+    '南高處': ['高雄市', '臺南市'],
 };
 
 
@@ -381,7 +381,7 @@ function highlightRegion(regionName) {
 // ==============================
 
 function highlightNorth2() {
-    highlightRegion('北二');
+    highlightRegion('北二處');
 }
 
 
@@ -442,36 +442,57 @@ document.addEventListener('keydown', (e) => {
         case 'q':
         case 'Q':
             loadTaiwan();
-            setTimeout(() => { highlightRegion('北一'); }, 500);
-            voiceStatus.innerHTML = "⌨️ 北一";
+            setTimeout(() => { highlightRegion('北一處'); }, 500);
+            voiceStatus.innerHTML = "⌨️ 北一處";
             break;
 
         case 'w':
         case 'W':
             loadTaiwan();
-            setTimeout(() => { highlightRegion('北二'); }, 500);
-            voiceStatus.innerHTML = "⌨️ 北二";
+            setTimeout(() => { highlightRegion('北二處'); }, 500);
+            voiceStatus.innerHTML = "⌨️ 北二處";
+            break;
+
+        case 'y':
+        case 'Y':
+            loadTaiwan();
+            setTimeout(() => { highlightRegion('北三處'); }, 500);
+            voiceStatus.innerHTML = "⌨️ 北三處";
+            break;
+
+        case 'u':
+        case 'U':
+            loadTaiwan();
+            setTimeout(() => { highlightRegion('中彰處'); }, 500);
+            voiceStatus.innerHTML = "⌨️ 中彰處";
+            break;
+
+        case 's':
+        case 'S':
+            loadTaiwan();
+            setTimeout(() => { highlightRegion('雲嘉處'); }, 500);
+            voiceStatus.innerHTML = "⌨️ 雲嘉處";
             break;
 
         case 'e':
         case 'E':
             loadTaiwan();
-            setTimeout(() => { highlightRegion('台中'); }, 500);
-            voiceStatus.innerHTML = "⌨️ 台中";
+            setTimeout(() => { highlightRegion('台中處'); }, 500);
+            voiceStatus.innerHTML = "⌨️ 台中處";
             break;
 
         case 'r':
         case 'R':
             loadTaiwan();
-            setTimeout(() => { highlightRegion('南高'); }, 500);
-            voiceStatus.innerHTML = "⌨️ 南高";
+            setTimeout(() => { highlightRegion('南高處'); }, 500);
+            voiceStatus.innerHTML = "⌨️ 南高處";
             break;
 
         case 't':
         case 'T':
             loadTaiwan();
-            setTimeout(() => { highlightRegion('桃竹'); }, 500);
-            voiceStatus.innerHTML = "⌨️ 桃竹";
+            setTimeout(() => { highlightRegion('桃竹處'); }, 500);
+            voiceStatus.innerHTML = "⌨️ 桃竹處";
             break;
 
     }
