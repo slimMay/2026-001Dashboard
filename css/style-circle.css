@@ -5,7 +5,7 @@
    日後增加到 5 個只需在 HTML 加 .box，不用動 CSS */
 #box-group {
   position: absolute; /* 改成 absolute 才能用 left/top 自由定位 */
-  left: 10px;         /* ← 整組水平位置 */
+  left: 50px;         /* ← 整組水平位置 */
   top: 50px;         /* ← 整組垂直位置 */
   display: flex;
   justify-content: center;
@@ -24,8 +24,8 @@
 
 /* ===== 圓圈本體（含圓點）===== */
 .circle {
-  width: 150px;   /* ← 圓圈尺寸（圓點 translateY 要搭配調整）*/
-  height: 150px;
+  width: 120px;   /* ← 圓圈尺寸（圓點 translateY 要搭配調整）*/
+  height: 120px;
   position: relative;
   display: flex;
   justify-content: center;
@@ -89,3 +89,17 @@
   }
 }
 
+
+
+@media (max-width: 680px) {
+
+      #box-group {
+        left:20px;
+        width: 90%;
+        height: 90%;
+    }
+    .circle {
+  width: 110px;   /* ← 圓圈尺寸（圓點 translateY 要搭配調整）*/
+  height: 110px;
+}
+}
