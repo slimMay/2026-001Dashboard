@@ -1,0 +1,105 @@
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: sans-serif;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #0d0b22;
+}
+
+/* ===== 整組位置控制 ===== 
+   修改 left / top 來移動整組；
+   日後增加到 5 個只需在 HTML 加 .box，不用動 CSS */
+#box-group {
+  position: absolute; /* 改成 absolute 才能用 left/top 自由定位 */
+  left: 10px;         /* ← 整組水平位置 */
+  top: 50px;         /* ← 整組垂直位置 */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;          /* 各圓之間的間距，統一在此調整 */
+}
+
+/* ===== 單一圓圈區塊 ===== */
+.box {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ===== 圓圈本體（含圓點）===== */
+.circle {
+  width: 150px;   /* ← 圓圈尺寸（圓點 translateY 要搭配調整）*/
+  height: 150px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ===== 中央數字 ===== */
+.circle .text {
+  position: absolute;
+  text-align: center;
+  color: #fff;
+  pointer-events: none;
+}
+
+.circle .text h2 {
+  font-size: 38px;
+  font-weight: 400;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+
+.circle .text h2::after {
+  content: "%";
+  font-size: 14px;
+  padding-left: 2px;
+  font-weight: 400;
+}
+
+/* ===== 標籤文字（圓圈下方）===== */
+.box .label {
+  font-size: 16px;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ===== 圓點 ===== */
+.circle .points {
+  width: 3px;
+  height: 12px;
+  background: #2a2845;
+  position: absolute;
+  border-radius: 3px;
+  /* translateY 負值 ≈ circle 尺寸的 45%，此處 150px → 約 -58px */
+  transform: rotate(calc(var(--i) * var(--rot))) translateY(-58px);
+}
+
+.points.marked {
+  animation: glow 0.04s linear forwards;
+  animation-delay: calc(var(--i) * 0.05s);
+}
+
+@keyframes glow {
+  0% {
+    background: #0007;
+    box-shadow: none;
+  }
+  100% {
+    background: var(--bgColor);
+    box-shadow: 0 0 10px var(--bgColor);
+  }
+}
+
