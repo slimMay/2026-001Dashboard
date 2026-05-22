@@ -1,18 +1,4 @@
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: sans-serif;
-}
-
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background: #0d0b22;
-}
 
 /* ===== 整組位置控制 ===== 
    修改 left / top 來移動整組；
