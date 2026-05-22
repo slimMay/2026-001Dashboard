@@ -16,8 +16,10 @@
 
     <script src="./js/amCharts.js"></script>
     <script src="./js/echarts-002.js"></script>
-    <link rel="stylesheet" href="./css/dashboard.css">
+    <link rel="stylesheet" href="./css/style-count.css">
     <link rel="stylesheet" href="./css/amCharts.css">
+    <link rel="stylesheet" href="./css/dashboard.css">
+    <link rel="stylesheet" href="./css/style-circle.css">
 
 </head>
 <body>
@@ -60,9 +62,12 @@
                     <button class="tab" onclick="switchTab(this)">門市家數</button>
                 </div>
                 <div class="total-row">
+                    總業績：<div class="numberRun"></div>
+                </div>
+                <!--<div class="total-row">
                     總業績：<span class="total-val">1,342,421</span>
                     <span style="font-size:12px;color:var(--muted)"> 萬元</span>
-                </div>
+                </div>-->
             </div>
 
             <!-- WIDGET: 行政區佔比 -->
@@ -142,7 +147,41 @@
                     <span style="font-size:16px;color:var(--muted);cursor:pointer">⋮</span>
                 </div>
                 <!-- 🔧 替換成你的元件 -->
-                <div class="placeholder" style="height:90px">元件放置區 A
+                <div class="placeholder" style="height:200px">
+                    <div id="box-group">
+
+  <div class="box">
+        <div class="circle" data-dots="75" data-percent="52" style="--bgColor:#52a8ff">
+        <div class="text"><h2>52</h2></div>
+         </div>
+        <span class="label">電商處</span>
+    </div>
+
+  <div class="box">
+        <div class="circle" data-dots="75" data-percent="70" style="--bgColor:#00ff00">
+        <div class="text"><h2>70</h2></div>
+         </div>
+        <span class="label">小時達</span>
+    </div>
+
+  <div class="box">
+        <div class="circle" data-dots="75" data-percent="60" style="--bgColor:#ff0070">
+        <div class="text"><h2>60</h2></div>
+         </div>
+        <span class="label">FoodPanda</span>
+    </div>
+
+    <!-- 日後新增：複製以下區塊 -->
+    <!--  <div class="box">
+                    <div class="circle" data-dots="75" data-percent="80" style="--bgColor:#ffaa00">
+                    <div class="text"><h2>80</h2></div>
+                     </div>
+                    <span class="label">第四平台</span>
+                 </div>
+                -->
+    </div>
+
+
                 </div>
 
             </div>
@@ -261,6 +300,8 @@
         </div><!-- /panel-bot -->
 
     </div><!-- /overlay -->
+
+    <script  src="./js/script-count.js"></script>
 
     <script>
         var myChart = echarts.init(document.getElementById('main'));
@@ -535,8 +576,8 @@
 
 
     </script>
-
-
+    <script  src="./script.js"></script>
+    <script src="./js/script-circle.js"></script>
 
     <script src="./js/voiceController.js"></script>
 
