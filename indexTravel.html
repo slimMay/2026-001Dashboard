@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>員工旅遊資訊平台</title>
+<style>
+  /* ============================================================
+     設計token：所有顏色/字體/間距集中在這裡，方便日後整體調整
+     ============================================================ */
+  :root{
+    --navy:        #16334d;
+    --navy-dark:   #0c2236;
+    --paper:       #f5f4f0;
+    --card:        #ffffff;
+    --ink:         #20262e;
+    --mute:        #6b7682;
+    --line:        #e3e2dc;
+    --red:         #c23b33;   /* 用餐地點標示 */
+    --blue:        #2f6fa8;   /* 路線標示 */
+    --amber:       #c98a1f;   /* 行程說明 */
+    --green:       #2f7b6c;   /* 名單 */
+    --radius: 12px;
+    --font-zh: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", "Heiti TC", sans-serif;
+    --font-num: "Helvetica Neue", Arial, var(--font-zh);
+  }
+  /* 每條路線各配一個識別色，視覺上像捷運路線編號，方便快速辨認 */
+  .line-color-0{ --line-color:#c23b33; }
+  .line-color-1{ --line-color:#2f6fa8; }
+  .line-color-2{ --line-color:#2f7b6c; }
+  .line-color-3{ --line-color:#c98a1f; }
+  .line-color-4{ --line-color:#7a5fc2; }
+  .line-color-5{ --line-color:#3d8fa6; }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--font-zh);
+    line-height:1.6;
+  }
+
+  /* ---------------- 頂部列 ---------------- */
+  .topbar{
+    background:var(--navy-dark);
+    color:#fff;
+    padding:14px 22px;
+    display:flex;
+    align-items:center;
+    gap:16px;
+    flex-wrap:wrap;
+    position:sticky; top:0; z-index:20;
+    box-shadow:0 2px 10px rgba(0,0,0,.15);
+  }
+  .topbar h1{
+    font-size:18px;
+    margin:0;
+    font-weight:700;
+    letter-spacing:.02em;
+  }
+  .topbar .sub{
+    font-size:12px;
+    color:#b9c3cd;
+  }
+  .topbar-spacer{ flex:1; }
+  .topbar .meta{
+    font-size:12px;
+    color:#b9c3cd;
+    text-align:right;
+  }
+  .btn{
+    border:1px solid rgba(255,255,255,.35);
+    background:transparent;
+    color:#fff;
+    padding:7px 14px;
+    border-radius:8px;
+    font-size:13px;
+    cursor:pointer;
+    font-family:var(--font-zh);
+  }
+  .btn:hover{ background:rgba(255,255,255,.12); }
+  .btn:focus-visible, a:focus-visible, button:focus-visible, select:focus-visible{
+    outline:2px solid #ffd76a; outline-offset:2px;
+  }
+
+  /* ---------------- 篩選列 ---------------- */
+  .filterbar{
+    background:#fff;
+    border-bottom:1px solid var(--line);
+    padding:10px 22px;
+    display:flex;
+    gap:14px;
+    align-items:center;
+    flex-wrap:wrap;
+    position:sticky; top:56px; z-index:19;
+  }
+  .filterbar label{ font-size:13px; color:var(--mute); }
+  .filterbar select, .filterbar input[type=search]{
+    font-family:var(--font-zh);
+    font-size:13px;
+    padding:6px 10px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:#fff;
+    color:var(--ink);
+  }
+
+  /* ---------------- 整體版面 ---------------- */
+  .layout{
+    display:flex;
+    max-width:1180px;
+    margin:0 auto;
+    gap:22px;
+    padding:20px;
+    align-items:flex-start;
+  }
+
+  /* 側邊：路線清單 */
+  .route-nav{
+    width:230px;
+    flex-shrink:0;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+  }
+  .route-nav-title{
+    font-size:12px;
+    color:var(--mute);
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    margin:0 4px 4px;
+  }
+  .route-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-left:4px solid var(--line-color);
+    border-radius:10px;
+    padding:10px 12px;
+    cursor:pointer;
+    text-align:left;
+    width:100%;
+    font-family:var(--font-zh);
+  }
+  .route-item:hover{ border-color:var(--line-color); }
+  .route-item.active{
+    background:var(--navy);
+    border-color:var(--navy);
+    color:#fff;
+  }
+  .route-item.active .route-item-theme{ color:#cfd9e2; }
+  .route-badge{
+    width:30px; height:30px; flex-shrink:0;
+    border-radius:50%;
+    background:var(--line-color);
+    color:#fff;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:13px;
+    font-family:var(--font-num);
+  }
+  .route-item-text{ overflow:hidden; }
+  .route-item-name{ font-size:13.5px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .route-item-theme{ font-size:11.5px; color:var(--mute); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  /* 內容區 */
+  .content{ flex:1; min-width:0; }
+
+  .route-card{
+    background:var(--navy);
+    color:#fff;
+    border-radius:var(--radius);
+    padding:22px 26px;
+    position:relative;
+    overflow:hidden;
+  }
+  .route-card::before{
+    content:"";
+    position:absolute; inset:0;
+    border-left:8px solid var(--line-color);
+  }
+  .route-card-head{
+    display:flex; align-items:center; gap:14px; margin-bottom:14px;
+  }
+  .route-card-badge{
+    width:46px; height:46px; border-radius:50%;
+    background:var(--line-color);
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px; font-weight:700; font-family:var(--font-num);
+    flex-shrink:0;
+  }
+  .route-card-head h2{ margin:0; font-size:22px; font-weight:700; }
+  .route-card-head .path{
+    font-size:12.5px; color:#b9c3cd; margin-top:2px;
+  }
+  .route-card-rows{ display:flex; flex-direction:column; gap:6px; font-size:14px; }
+  .marker-row{ display:flex; align-items:baseline; gap:8px; }
+  .dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+  .dot.theme{ background:var(--red); }
+  .dot.meal{ background:var(--red); }
+  .marker-row b{ font-weight:700; }
+
+  /* 梯次表 */
+  .batches{
+    margin-top:16px;
+    background:var(--card);
+    border-radius:var(--radius);
+    border:1px solid var(--line);
+    overflow:hidden;
+  }
+  table{ width:100%; border-collapse:collapse; font-size:13.5px; }
+  thead th{
+    background:#eef0ed;
+    color:var(--mute);
+    font-weight:700;
+    text-align:left;
+    padding:10px 14px;
+    font-size:12px;
+    letter-spacing:.03em;
+    border-bottom:1px solid var(--line);
+  }
+  tbody td{
+    padding:11px 14px;
+    border-bottom:1px solid var(--line);
+    vertical-align:middle;
+  }
+  tbody tr:last-child td{ border-bottom:none; }
+  tbody tr:hover{ background:#fafaf7; }
+  .seq-badge{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:24px; height:24px; border-radius:50%;
+    background:var(--line-color); color:#fff; font-weight:700; font-size:12px;
+    font-family:var(--font-num);
+  }
+  .date-cell b{ font-size:14px; }
+  .date-cell .wk{ color:var(--mute); font-size:12px; margin-left:3px; }
+  .agency-tag{
+    display:inline-block;
+    font-size:11.5px;
+    padding:3px 9px;
+    border-radius:999px;
+    background:#eef2f5;
+    color:var(--blue);
+    border:1px solid #d7e2ea;
+    white-space:nowrap;
+  }
+  .doc-link{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:12.5px;
+    padding:6px 10px;
+    border-radius:8px;
+    text-decoration:none;
+    border:1px solid var(--line);
+    color:var(--ink);
+    background:#fff;
+    max-width:230px;
+  }
+  .doc-link span{ overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .doc-link:hover{ border-color:var(--line-color); color:var(--line-color); }
+  .doc-link.handbook{ border-color:#d7e2ea; }
+  .doc-link.handbook:hover{ color:var(--blue); border-color:var(--blue); }
+  .doc-link.brief{ border-color:#ecdcc0; }
+  .doc-link.brief:hover{ color:var(--amber); border-color:var(--amber); }
+  .doc-link.roster{ border-color:#cfe6e0; }
+  .doc-link.roster:hover{ color:var(--green); border-color:var(--green); }
+  .doc-missing{ font-size:12px; color:#b6bcc2; }
+  .doc-cell{ display:flex; flex-direction:column; gap:5px; align-items:flex-start; }
+
+  .empty, .loading, .errorbox{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    padding:40px 24px; text-align:center; color:var(--mute); font-size:14px;
+  }
+  .errorbox{ color:#8a2f29; border-color:#e3c3bf; background:#fdf3f1; }
+
+  footer{
+    max-width:1180px; margin:0 auto; padding:6px 22px 40px;
+    font-size:12px; color:var(--mute);
+  }
+
+  /* ---------------- 手機版 ---------------- */
+  @media (max-width: 760px){
+    .layout{ flex-direction:column; padding:14px; }
+    .route-nav{
+      width:100%;
+      flex-direction:row;
+      overflow-x:auto;
+      padding-bottom:4px;
+    }
+    .route-item{ width:auto; flex-shrink:0; min-width:160px; }
+    table, thead, tbody, th, td, tr{ display:block; }
+    thead{ display:none; }
+    tbody tr{
+      border:1px solid var(--line); border-radius:10px; margin:10px; padding:10px 4px;
+    }
+    tbody td{ border-bottom:none; padding:6px 10px; }
+    tbody td::before{
+      content: attr(data-label);
+      display:block; font-size:11px; color:var(--mute); margin-bottom:3px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <h1>全聯福利中心 員工旅遊資訊平台</h1>
+    <div class="sub">資料來源：Google Sheet（承辦人維護）</div>
+  </div>
+  <div class="topbar-spacer"></div>
+  <div class="meta" id="updatedMeta">資料載入中…</div>
+  <button class="btn" id="refreshBtn">重新整理</button>
+</div>
+
+<div class="filterbar">
+  <label for="agencyFilter">承辦旅行社</label>
+  <select id="agencyFilter">
+    <option value="">全部</option>
+  </select>
+
+  <label for="searchInput">搜尋</label>
+  <input id="searchInput" type="search" placeholder="搜尋主題 / 用餐地點 / 日期…" />
+</div>
+
+<div class="layout">
+  <nav class="route-nav" id="routeNav" aria-label="路線清單">
+    <p class="route-nav-title">路線清單</p>
+    <!-- 路線按鈕由 JS 動態產生 -->
+  </nav>
+
+  <main class="content" id="content">
+    <div class="loading">資料載入中…</div>
+  </main>
+</div>
+
+<footer>
+  本頁面資料每次開啟皆即時讀取 Google Sheet，承辦人更新 Sheet 後重新整理本頁即可看到最新內容。
+</footer>
+
+<script>
+/* ============================================================
+   1. 設定區：把這個換成你「發布到網路」產生的 CSV 連結
+   ============================================================
+   操作方式：Google Sheet → 檔案 → 共用 → 發布到網路 →
+            選擇分頁 → 格式選 csv → 發布 → 複製連結貼在下面
+*/
+    /*const SHEET_CSV_URL = "REPLACE_WITH_YOUR_PUBLISHED_CSV_URL";*/
+    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSj9Xy7r1N8FMwFSySh_yJUDwo6P9Mfavt4BKgwAUfkSbQ4c5D5KthZnwOC3e_RxDAa8SIiWXRsGWYJ/pub?gid=0&single=true&output=csv";
+
+/* 找不到/尚未設定真實連結時，使用以下示範資料，
+   讓頁面在學習/測試階段也能正常運作。
+   正式上線後把 SHEET_CSV_URL 換成真連結即可，這段示範資料就不會被用到。
+const DEMO_CSV = `路線編號,路線名稱,主題,用餐地點,發車起點,到站景點,梯次,出發日期,承辦旅行社,手冊檔名,手冊連結,說明檔名,說明連結,名單連結
+3,路線3,林美石磬+宜蘭傳藝,蘭城晶英櫻桃鴨,華山營業所,宜蘭火車站,1,2026/03/31,台北島語,0331--台北島語.pdf,https://drive.google.com/file/d/17GAGuLcNr2FB-U2HPZwJNo9GB1rehEVk/view?usp=drive_link,,,
+3,路線3,林美石磬+宜蘭傳藝,蘭城晶英櫻桃鴨,華山營業所,宜蘭火車站,2,2026/04/07,全聯宜蘭旅行社,,,,,
+3,路線3,林美石磬+宜蘭傳藝,蘭城晶英櫻桃鴨,華山營業所,宜蘭火車站,3,2026/04/09,台北島語,,,,,
+3,路線3,林美石磬+宜蘭傳藝,蘭城晶英櫻桃鴨,華山營業所,宜蘭火車站,4,2026/04/14,全聯宜蘭旅行社,0414--全聯宜蘭手冊(改).pdf,https://drive.google.com/file/d/16RAHfsYda_t1huNxeiL0kbvCjxoOJdnE/view?usp=drive_link,,,
+3,路線3,林美石磬+宜蘭傳藝,蘭城晶英櫻桃鴨,華山營業所,宜蘭火車站,5,2026/04/16,台北島語,,,,,
+3,路線3,林美石磬+宜蘭傳藝,蘭城晶英櫻桃鴨,華山營業所,宜蘭火車站,6,2026/04/21,全聯宜蘭旅行社,,,,,
+3,路線3,林美石磬+宜蘭傳藝,蘭城晶英櫻桃鴨,華山營業所,宜蘭火車站,7,2026/04/23,台北島語,,,,,
+3,路線3,林美石磬+宜蘭傳藝,蘭城晶英櫻桃鴨,華山營業所,宜蘭火車站,8,2026/04/28,全聯宜蘭旅行社,,,,,
+1,路線1,日月潭採茶趣+九族文化村,向山美食館,華山營業所,日月潭,1,2026/03/24,台北島語,,,,,
+1,路線1,日月潭採茶趣+九族文化村,向山美食館,華山營業所,日月潭,2,2026/04/02,台北島語,,,,,
+2,路線2,溪頭妖怪村+忘憂森林,竹屋餐廳,宜蘭火車站,溪頭,1,2026/03/26,全聯宜蘭旅行社,,,,,
+2,路線2,溪頭妖怪村+忘憂森林,竹屋餐廳,宜蘭火車站,溪頭,2,2026/04/11,全聯宜蘭旅行社,,,,,
+`; */
+
+/* ============================================================
+   2. 極簡 CSV 解析器（支援雙引號內含逗號/換行，不依賴外部套件）
+   ============================================================ */
+function parseCSV(text){
+  const rows = [];
+  let row = [], field = "", inQuotes = false;
+  for(let i=0; i<text.length; i++){
+    const c = text[i];
+    if(inQuotes){
+      if(c === '"'){
+        if(text[i+1] === '"'){ field += '"'; i++; }
+        else inQuotes = false;
+      } else field += c;
+    } else {
+      if(c === '"') inQuotes = true;
+      else if(c === ','){ row.push(field); field=""; }
+      else if(c === '\n'){ row.push(field); rows.push(row); row=[]; field=""; }
+      else if(c === '\r'){ /* ignore, \n handles line break */ }
+      else field += c;
+    }
+  }
+  if(field.length || row.length){ row.push(field); rows.push(row); }
+  if(!rows.length) return [];
+  const headers = rows[0].map(h => h.trim());
+  return rows.slice(1)
+    .filter(r => r.some(v => v && v.trim() !== ""))
+    .map(r => {
+      const obj = {};
+      headers.forEach((h, idx) => obj[h] = (r[idx] ?? "").trim());
+      return obj;
+    });
+}
+
+/* ============================================================
+   3. 工具函式
+   ============================================================ */
+function isRealLink(v){
+  return !!v && /^https?:\/\//i.test(v.trim());
+}
+
+function weekdayLabel(dateStr){
+  // 接受 2026/03/31 或 2026-03-31，自動算出星期幾，格式對齊原始介面：03/31(二)
+  if(!dateStr) return { md: "", wk: "" };
+  const norm = dateStr.replace(/-/g, "/");
+  const parts = norm.split("/");
+  if(parts.length < 3) return { md: dateStr, wk: "" };
+  const [y, m, d] = parts.map(Number);
+  const dt = new Date(y, m-1, d);
+  if(isNaN(dt.getTime())) return { md: dateStr, wk: "" };
+  const wkChars = ["日","一","二","三","四","五","六"];
+  const md = `${String(m).padStart(2,"0")}/${String(d).padStart(2,"0")}`;
+  return { md, wk: wkChars[dt.getDay()], sortKey: dt.getTime() };
+}
+
+function escapeHtml(s){
+  return (s ?? "").replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
+}
+
+/* ============================================================
+   4. 資料載入與分組
+   ============================================================ */
+let ROUTES = [];        // 分組後的路線陣列
+let ACTIVE_ROUTE = null;
+let AGENCY_FILTER = "";
+let SEARCH_TERM = "";
+
+async function loadData(){
+  setLoading();
+  let csvText = "";
+  let usedDemo = false;
+  try{
+    if(!SHEET_CSV_URL || SHEET_CSV_URL.startsWith("REPLACE_")){
+      throw new Error("尚未設定 SHEET_CSV_URL");
+    }
+    const res = await fetch(SHEET_CSV_URL, { cache: "no-store" });
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    csvText = await res.text();
+  } catch(err){
+    console.warn("讀取 Google Sheet 失敗，改用示範資料：", err.message);
+    csvText = DEMO_CSV;
+    usedDemo = true;
+  }
+
+  const rows = parseCSV(csvText);
+  ROUTES = groupRoutes(rows);
+  renderAgencyOptions(rows);
+  renderRouteNav();
+  if(!ACTIVE_ROUTE && ROUTES.length) ACTIVE_ROUTE = ROUTES[0].id;
+  renderContent();
+  updateMeta(usedDemo);
+}
+
+function groupRoutes(rows){
+  const map = new Map();
+  rows.forEach(r => {
+    const id = r["路線編號"] || r["路線名稱"] || "未分類";
+    if(!map.has(id)){
+      map.set(id, {
+        id,
+        name: r["路線名稱"] || ("路線" + id),
+        theme: r["主題"] || "",
+        meal: r["用餐地點"] || "",
+        from: r["發車起點"] || "",
+        to: r["到站景點"] || "",
+        batches: []
+      });
+    }
+    map.get(id).batches.push(r);
+  });
+  const list = Array.from(map.values());
+  list.forEach(rt => {
+    rt.batches.sort((a,b) => (Number(a["梯次"])||0) - (Number(b["梯次"])||0));
+  });
+  list.sort((a,b) => (Number(a.id)||0) - (Number(b.id)||0));
+  return list;
+}
+
+function renderAgencyOptions(rows){
+  const sel = document.getElementById("agencyFilter");
+  const current = sel.value;
+  const agencies = Array.from(new Set(rows.map(r => r["承辦旅行社"]).filter(Boolean))).sort();
+  sel.innerHTML = '<option value="">全部</option>' +
+    agencies.map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join("");
+  if(agencies.includes(current)) sel.value = current;
+}
+
+/* ============================================================
+   5. 畫面渲染
+   ============================================================ */
+function setLoading(){
+  document.getElementById("content").innerHTML = '<div class="loading">資料載入中…</div>';
+}
+
+function updateMeta(usedDemo){
+  const now = new Date();
+  const stamp = now.toLocaleString("zh-TW", { hour12:false });
+  const meta = document.getElementById("updatedMeta");
+  meta.textContent = (usedDemo ? "⚠ 目前顯示示範資料（尚未連接 Sheet）・" : "") + "最後更新：" + stamp;
+}
+
+function renderRouteNav(){
+  const nav = document.getElementById("routeNav");
+  const title = '<p class="route-nav-title">路線清單</p>';
+  nav.innerHTML = title + ROUTES.map((rt, idx) => `
+    <button class="route-item line-color-${idx % 6} ${rt.id===ACTIVE_ROUTE ? "active":""}"
+            data-route="${escapeHtml(rt.id)}">
+      <span class="route-badge">${escapeHtml(rt.id)}</span>
+      <span class="route-item-text">
+        <span class="route-item-name">${escapeHtml(rt.name)}</span>
+        <span class="route-item-theme">${escapeHtml(rt.theme)}</span>
+      </span>
+    </button>
+  `).join("");
+
+  nav.querySelectorAll(".route-item").forEach(btn => {
+    btn.addEventListener("click", () => {
+      ACTIVE_ROUTE = btn.dataset.route;
+      renderRouteNav();
+      renderContent();
+    });
+  });
+}
+
+function docLinkHtml(filename, url, cls, icon){
+  if(isRealLink(url)){
+    const label = filename && filename.trim() ? filename : "下載檔案";
+    return `<a class="doc-link ${cls}" href="${escapeHtml(url)}" target="_blank" rel="noopener">
+              ${icon}<span>${escapeHtml(label)}</span>
+            </a>`;
+  }
+  return `<span class="doc-missing">尚未提供</span>`;
+}
+
+function renderContent(){
+  const content = document.getElementById("content");
+  const rt = ROUTES.find(r => r.id === ACTIVE_ROUTE);
+  if(!rt){
+    content.innerHTML = '<div class="empty">尚無路線資料，請確認 Google Sheet 內容。</div>';
+    return;
+  }
+  const idx = ROUTES.indexOf(rt);
+
+  let batches = rt.batches;
+  if(AGENCY_FILTER){
+    batches = batches.filter(b => b["承辦旅行社"] === AGENCY_FILTER);
+  }
+  if(SEARCH_TERM){
+    const term = SEARCH_TERM.toLowerCase();
+    const haystack = [rt.theme, rt.meal, rt.from, rt.to].join(" ").toLowerCase();
+    batches = batches.filter(b =>
+      haystack.includes(term) ||
+      (b["出發日期"]||"").toLowerCase().includes(term) ||
+      (b["承辦旅行社"]||"").toLowerCase().includes(term)
+    );
+  }
+
+  const rowsHtml = batches.length ? batches.map(b => {
+    const { md, wk } = weekdayLabel(b["出發日期"]);
+    return `
+      <tr>
+        <td data-label="梯次"><span class="seq-badge">${escapeHtml(b["梯次"]||"-")}</span></td>
+        <td data-label="出發日期" class="date-cell"><b>${escapeHtml(md)}</b><span class="wk">${wk ? "("+wk+")":""}</span></td>
+        <td data-label="承辦旅行社">${b["承辦旅行社"] ? `<span class="agency-tag">${escapeHtml(b["承辦旅行社"])}</span>` : "-"}</td>
+        <td data-label="旅遊手冊">
+          <div class="doc-cell">
+            ${docLinkHtml(b["手冊檔名"], b["手冊連結"], "handbook", iconBook())}
+          </div>
+        </td>
+        <td data-label="行程說明">
+          <div class="doc-cell">
+            ${docLinkHtml(b["說明檔名"], b["說明連結"], "brief", iconDoc())}
+          </div>
+        </td>
+        <td data-label="報名名單">
+          <div class="doc-cell">
+            ${isRealLink(b["名單連結"]) ? docLinkHtml("報名名單.pdf", b["名單連結"], "roster", iconList()) : '<span class="doc-missing">-</span>'}
+          </div>
+        </td>
+      </tr>`;
+  }).join("") : `<tr><td colspan="6"><div class="empty">沒有符合篩選條件的梯次</div></td></tr>`;
+
+  content.innerHTML = `
+    <div class="route-card line-color-${idx % 6}">
+      <div class="route-card-head">
+        <div class="route-card-badge">${escapeHtml(rt.id)}</div>
+        <div>
+          <h2>${escapeHtml(rt.name)}</h2>
+          <div class="path">${escapeHtml(rt.from)} → ${escapeHtml(rt.to)}</div>
+        </div>
+      </div>
+      <div class="route-card-rows">
+        <div class="marker-row"><span class="dot theme"></span> 主題：<b>${escapeHtml(rt.theme)}</b></div>
+        <div class="marker-row"><span class="dot meal"></span> 午餐：<b>${escapeHtml(rt.meal)}</b></div>
+      </div>
+    </div>
+
+    <div class="batches">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:60px">梯次</th>
+            <th style="width:110px">出發日期</th>
+            <th style="width:130px">承辦旅行社</th>
+            <th>旅遊手冊</th>
+            <th>行程說明</th>
+            <th>報名名單</th>
+          </tr>
+        </thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+/* 小圖示，純 SVG 內嵌，不依賴外部圖示庫 */
+function iconBook(){ return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>`; }
+function iconDoc(){ return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>`; }
+function iconList(){ return `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>`; }
+
+/* ============================================================
+   6. 事件綁定
+   ============================================================ */
+document.getElementById("refreshBtn").addEventListener("click", loadData);
+document.getElementById("agencyFilter").addEventListener("change", e => {
+  AGENCY_FILTER = e.target.value;
+  renderContent();
+});
+document.getElementById("searchInput").addEventListener("input", e => {
+  SEARCH_TERM = e.target.value.trim();
+  renderContent();
+});
+
+loadData();
+</script>
+</body>
+</html>
