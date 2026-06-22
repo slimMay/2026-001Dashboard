@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>TravelList</title>
+    <link rel="stylesheet" href="https://public.codepenassets.com/css/normalize-5.0.0.min.css">
+<link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Almarai:wght@800&amp;family=Nunito+Sans&amp;display=swap'>
+
+  </head>
+  <style>
+  @charset "UTF-8";
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 50px;
+  min-height: 100vh;
+  position: relative;
+  background-color: #ddd;
+  color: #fff;
+  font-family: "Nunito Sans", sans-serif;
+  font-size: 19px;
+}
+
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding-top:0px;
+}
+
+.content {
+  text-align: center;
+  width:800px;
+  height:200px;
+  background-image: url("BannerBG.png");
+  background-repeat: no-repeat, repeat;
+}
+
+table {
+  width:100%;
+  padding-top:0;
+  heigh: 200px;
+  color:#000;
+  z-index: 10;
+}
+
+.T1 {
+  padding-top:40px;
+  vertical-align: top;
+  width: 15%;
+  font-size: 1.85rem;
+}
+
+.T2 {
+  padding-top:40px;
+    width: 70%;
+  font-size: 1.8rem;
+  color:#4a4b4e;
+}
+
+p {
+  font-size: 1.25rem;
+  color:#4a4b4e;
+}
+.T4 {
+  padding-top:10px;
+  vertical-align: top;
+  padding-right: 25px;
+  width: 14.5%;
+  font-size: 1.25rem;
+  color:#fff;
+}
+
+.links {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.links a {
+  position: relative;
+  display: block;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 5px;
+  padding: 20px;
+  padding-left: 15%;
+  font-size: 1.6rem;
+  text-decoration: none;
+  color: #222;
+  transition: 0.3s ease all;
+  overflow: hidden;
+}
+
+.links a:before,
+.links a:after {
+  font-size: 40px;
+  display: block;
+  position: absolute;
+}
+
+.links a:before {
+  content: "";
+  top: -80%;
+  right: -150px;
+  width: 250px;
+  height: 250px;
+  background: rgba(125, 236, 255, 0.6);
+  pointer-events: none;
+  transform: rotate(-25deg);
+  transition: 0.4s cubic-bezier(0.34, 0.31, 0, 1.81) transform;
+}
+
+.links a:after {
+  content: "👉";
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  right: 30px;
+  transform: translateX(80px);
+  transition: 0.3s cubic-bezier(0.34, 0.31, 0, 1.81) transform;
+}
+
+.links a:hover {
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.5);
+}
+
+.links a:hover:before {
+  transform: rotate(-25deg) translateX(60px);
+}
+
+.links a:hover:after {
+  transform: none;
+}
+
+
+
+/* ---------------- 手機版 ---------------- */
+  @media (max-width: 760px) {
+
+  h1 {
+  font-size: 1.5rem;
+}  
+
+
+.links a {
+  position: relative;
+  display: block;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 5px;
+  padding: 10px;
+  padding-left: 15%;
+  font-size: 1.2rem;
+  text-decoration: none;
+    z-index: 1;
+  color: #222;
+  transition: 0.3s ease all;
+  overflow: hidden;
+}
+
+.links a:before,
+.links a:after {
+  font-size: 30px;
+  display: block;
+  position: absolute;
+}
+
+.links a:before {
+  content: "";
+  top: -80%;
+  right: -200px;
+  width: 250px;
+  height: 250px;
+  background: rgba(125, 236, 255, 0.6);
+  pointer-events: none;
+  transform: rotate(-25deg);
+  transition: 0.4s cubic-bezier(0.34, 0.31, 0, 1.81) transform;
+  z-index: 0;
+}
+     .links a:after {
+        content: "👉";
+        top: 0;
+        bottom: 0;
+        display: flex;
+        align-items: center;
+        right: 0px;
+        transform: translateX(80px);
+        transition: 0.3s cubic-bezier(0.34, 0.31, 0, 1.81) transform;
+      }
+    </style>
+    
+  <body>
+  <div class="container">
+  <div class="content">
+   <table>
+      <tr>
+         <th class="T1">路線1</th>
+         <th class="T2">北投溫泉博物館+101信義區</br><p>旅遊手冊電子檔</p></th>
+         <th class="T4">一日遊</th>
+      </tr>
+    </table>
+  </div>
+
+  <div class="links">
+    <a href="https://drive.google.com/file/d/17GAGuLcNr2FB-U2HPZwJNo9GB1rehEVk/view?usp=drive_link" target="_blank"><strong>03/26 (四)</strong></a>
+    <a href="https://drive.google.com/file/d/17GAGuLcNr2FB-U2HPZwJNo9GB1rehEVk/view?usp=drive_link" target="_blank"><strong>03/31 (二)</strong></a>
+    <a href="https://drive.google.com/file/d/17GAGuLcNr2FB-U2HPZwJNo9GB1rehEVk/view?usp=drive_link" target="_blank"><strong>04/07 (二)</strong></a>
+    <a href="https://drive.google.com/file/d/17GAGuLcNr2FB-U2HPZwJNo9GB1rehEVk/view?usp=drive_link" target="_blank"><strong>04/09 (四)</strong></a>
+    <a href="https://drive.google.com/file/d/17GAGuLcNr2FB-U2HPZwJNo9GB1rehEVk/view?usp=drive_link" target="_blank"><strong>04/14 (二)</strong></a>
+    <a href="https://drive.google.com/file/d/17GAGuLcNr2FB-U2HPZwJNo9GB1rehEVk/view?usp=drive_link" target="_blank"><strong>04/16 (四)</strong></a>
+    <a href="https://drive.google.com/file/d/17GAGuLcNr2FB-U2HPZwJNo9GB1rehEVk/view?usp=drive_link" target="_blank"><strong>04/21 (二)</strong></a>
+    <a href="https://drive.google.com/file/d/17GAGuLcNr2FB-U2HPZwJNo9GB1rehEVk/view?usp=drive_link" target="_blank"><strong>04/23 (四)</strong></a>
+  </div>
+</div>
+    
+  </body>
+  
+</html>
