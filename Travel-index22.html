@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pxmart 員工旅遊地圖</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Microsoft JhengHei', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      /*padding: 20px;*/
+    }
+    .container {
+      max-width: 100VW;
+      margin: 0 auto;
+      background: white;
+      /*border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);*/
+      overflow: hidden;
+    }
+
+    .content {
+      display: flex;
+      height: calc(100vh - 200px);
+      min-height: 100vh;
+    }
+    .sidebar {
+      width: 320px;
+      background: #f8f9fa;
+      padding: 15px;
+      overflow-y: auto;
+      border-right: 2px solid #e0e0e0;
+    }
+    .sidebar-header {
+      position: sticky;
+      top: 0;
+      background: #f8f9fa;
+      padding-bottom: 12px;
+      margin-bottom: 12px;
+      border-bottom: 2px solid #ddd;
+      z-index: 10;
+    }
+    .sidebar-header h2 {
+      font-size: 1.05em;
+      color: #2c3e50;
+      margin-bottom: 6px;
+    }
+    .sidebar-header .stats {
+      font-size: 0.85em;
+      color: #999;
+    }
+    .tour-section {
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: 0.95em;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid #ddd;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .tour-card {
+      background: white;
+      border-radius: 10px;
+      padding: 12px 15px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: 2px solid transparent;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .tour-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+    .tour-card.active {
+      border-color: currentColor;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      background: rgba(0,0,0,0.02);
+    }
+    .tour-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75em;
+      font-weight: bold;
+      color: white;
+      white-space: nowrap;
+    }
+    .tour-info {
+      color: #666;
+      font-size: 0.85em;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+    .tour-focus {
+      background: #f0f7ff;
+      padding: 8px;
+      border-radius: 6px;
+      margin-top: 8px;
+      border-left: 3px solid currentColor;
+      font-size: 0.85em;
+    }
+    .tour-focus strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 0.85em;
+    }
+    .map-container {
+      flex: 1;
+      position: relative;
+      background: #404a59;
+    }
+    #main {
+      width: 100%;
+      height: 100%;
+    }
+    .legend-custom {
+      position: absolute;
+      bottom: 30px;
+      right: 30px;
+      background: rgba(255,255,255,0.95);
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 100;
+    }
+    .legend-title {
+      font-weight: bold;
+      margin-bottom: 12px;
+      font-size: 1.1em;
+      color: #2c3e50;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    .legend-item:hover {
+      background: #f0f0f0;
+    }
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    .loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+      font-size: 1.5em;
+      color: #666;
+    }
+    .mobile-toggle {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 25px;
+      font-size: 1em;
+      font-weight: bold;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .mobile-toggle:active {
+      transform: translateX(-50%) scale(0.95);
+    }
+    
+    /* 平板電腦 (768px - 1024px) */
+    @media screen and (max-width: 1024px) {
+      .header h1 {
+        font-size: 1.5em;
+      }
+      .header p {
+        font-size: 0.95em;
+      }
+      .sidebar {
+        width: 280px;
+      }
+      .content {
+        min-height: 500px;
+      }
+    }
+    
+    /* 手機橫向 (576px - 767px) */
+    @media screen and (max-width: 767px) {
+      body {
+        padding: 0;
+      }
+      .container {
+        border-radius: 0;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .header {
+        padding: 15px;
+      }
+      .header h1 {
+        font-size: 1.3em;
+        margin-bottom: 5px;
+      }
+      .header p {
+        font-size: 0.85em;
+      }
+      .content {
+        flex: 1;
+        min-height: 0;
+        position: relative;
+        flex-direction: column;
+      }
+      .sidebar {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 999;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+      }
+      .sidebar.show {
+        transform: translateX(0);
+      }
+      .sidebar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .close-sidebar {
+        background: #e74c3c;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 1em;
+        cursor: pointer;
+        font-weight: bold;
+      }
+      .map-container {
+        width: 100%;
+        height: 100%;
+      }
+      .mobile-toggle {
+        display: block;
+      }
+      .tour-card {
+        padding: 12px;
+      }
+      .tour-card h3 {
+        font-size: 0.95em;
+      }
+    }
+    
+    /* 小手機 (max 575px) */
+    @media screen and (max-width: 575px) {
+      .header h1 {
+        font-size: 1.1em;
+      }
+      .header p {
+        font-size: 0.8em;
+      }
+      .sidebar {
+        padding: 12px;
+      }
+      .tour-card {
+        padding: 10px;
+        margin-bottom: 8px;
+      }
+      .tour-card h3 {
+        font-size: 0.9em;
+      }
+      .tour-info {
+        font-size: 0.8em;
+      }
+      .tour-focus {
+        font-size: 0.8em;
+        padding: 6px;
+      }
+      .mobile-toggle {
+        padding: 10px 20px;
+        font-size: 0.9em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="content">
+      <div class="sidebar" id="sidebar">
+        <div class="loading">載入中...</div>
+      </div>
+      <div class="map-container">
+        <div id="main"></div>
+      </div>
+    </div>
+    <button class="mobile-toggle" onclick="toggleSidebar()">
+      📋 切換行程列表
+    </button>
+  </div>
+
+  <script>
+    // 設定檔
+    const CONFIG = {
+      // 替換為您的 Apps Script 部署網址
+      GOOGLE_SHEETS_URL: 'https://script.google.com/macros/s/AKfycby9fXQmvmppfB3SR0JbGaAOkjq8jOqo4Q2WjcuhDi1cKpBzX59Rw2qrbZkRHoMy0DRr/exec',
+      // 或使用範例資料（開發測試用）
+      USE_DEMO_DATA: false
+    };
+
+    // 範例資料（實際使用時會從 Google Sheets 載入）
+    const DEMO_DATA = {
+      tours: [
+        {
+          id: '1-1',
+          name: '新竹一日遊',
+          type: '一日遊',
+          color: '#a6c84c',
+          startPoint: '新竹火車站',
+          focusPoint: {
+            name: '旭集 和食集錦 竹北遠百店',
+            coords: [121.023582, 24.822821],
+            time: '1130',
+            duration: '150min',
+            note: '自助午餐'
+          },
+          points: [
+            { name: '新竹火車站', coords: [120.971631, 24.801857], time: '0900', duration: '30min', note: '集合', order: 1 },
+            { name: '青青草原', coords: [120.930683, 24.883078], time: '0930', duration: '90min', note: '', order: 2 },
+            { name: '旭集 和食集錦 竹北遠百店', coords: [121.023582, 24.822821], time: '1130', duration: '150min', note: '自助午餐', order: 3 },
+            { name: '廢物媽媽育兒農場', coords: [120.912459, 24.823969], time: '1430', duration: '90min', note: '', order: 4 }
+          ]
+        },
+        {
+          id: '1-2',
+          name: '小琉球一日遊',
+          type: '一日遊',
+          color: '#ffa022',
+          startPoint: '小琉球環島',
+          focusPoint: {
+            name: '小琉球燒肉王',
+            coords: [120.372497, 22.342301],
+            time: '1130',
+            duration: '90min',
+            note: '每人龍蝦一隻'
+          },
+          points: [
+            { name: '小琉球環島', coords: [120.380148, 22.356667], time: '0900', duration: '120min', note: '', order: 1 },
+            { name: '小琉球燒肉王', coords: [120.372497, 22.342301], time: '1130', duration: '90min', note: '每人龍蝦一隻', order: 2 },
+            { name: '玻璃船', coords: [120.384575, 22.352244], time: '1330', duration: '60min', note: '', order: 3 }
+          ]
+        },
+        {
+          id: '2-1',
+          name: '日月潭二日遊',
+          type: '二日遊',
+          color: '#46bee9',
+          startPoint: '埔里酒廠',
+          focusPoint: {
+            name: '日月潭馥麗溫泉飯店',
+            coords: [120.908727, 23.868294],
+            time: '1700',
+            duration: '',
+            note: '自助晚餐＋早餐&設施'
+          },
+          points: [
+            { name: '埔里酒廠', coords: [120.960340, 23.976042], time: '1030', duration: '60min', note: '', order: 1 },
+            { name: '向山遊客中心', coords: [120.902252, 23.852412], time: '1300', duration: '30min', note: '', order: 2 },
+            { name: '日月潭遊船', coords: [120.929688, 23.849973], time: '1400', duration: '120min', note: '', order: 3 },
+            { name: '日月潭馥麗溫泉飯店', coords: [120.908727, 23.868294], time: '1700', duration: '', note: '自助晚餐＋早餐&設施', order: 4 },
+            { name: '多肉秘境', coords: [120.966703, 24.018096], time: '0930', duration: '120min', note: '', order: 5 },
+            { name: '寶湖宮天地堂地母廟', coords: [120.990102, 23.952104], time: '1300', duration: '60min', note: '', order: 6 },
+            { name: '日月町複合式商場', coords: [120.925516, 23.973461], time: '1430', duration: '90min', note: '南投網美新地標', order: 7 }
+          ]
+        }
+      ]
+    };
+
+    let myChart;
+    let toursData = [];
+    let selectedTours = new Set();
+
+    // 初始化
+    async function init() {
+      try {
+        // 載入資料
+        if (CONFIG.USE_DEMO_DATA) {
+          toursData = DEMO_DATA.tours;
+        } else {
+          const response = await fetch(CONFIG.GOOGLE_SHEETS_URL);
+          const data = await response.json();
+          console.log('從 Google Sheets 載入的資料:', data);
+          
+          // 檢查資料格式
+          if (!data || !data.tours || !Array.isArray(data.tours)) {
+            throw new Error('資料格式錯誤');
+          }
+          
+          // 確保每個行程都有必要的欄位
+          toursData = data.tours.map(tour => ({
+            ...tour,
+            points: tour.points || []
+          }));
+          
+          console.log('處理後的行程資料:', toursData);
+        }
+
+        // 預設全選
+        toursData.forEach(tour => selectedTours.add(tour.id));
+
+        // 載入地圖資料
+        const geojsonResponse = await fetch('https://raw.githubusercontent.com/pxfound-design/twCounty2025/refs/heads/main/twCounty2025.json');
+        const geojson = await geojsonResponse.json();
+
+        // 初始化圖表
+        initChart(geojson);
+        
+        // 渲染側邊欄
+        renderSidebar();
+
+      } catch (error) {
+        console.error('初始化失敗:', error);
+        document.getElementById('sidebar').innerHTML = `
+          <div class="loading" style="color: red;">
+            <strong>載入失敗</strong><br><br>
+            錯誤訊息：${error.message}<br><br>
+            請確認：<br>
+            1. Google Sheets API 網址正確<br>
+            2. Apps Script 已正確部署<br>
+            3. 資料格式符合規範<br><br>
+            <button onclick="location.reload()" style="padding: 8px 16px; cursor: pointer;">
+              重新整理
+            </button>
+          </div>
+        `;
+      }
+    }
+
+    function initChart(geojson) {
+      const chartDom = document.getElementById('main');
+      myChart = echarts.init(chartDom);
+      echarts.registerMap('TW', geojson);
+      updateChart();
+    }
+
+    function updateChart() {
+      const series = [];
+      
+      toursData.forEach((tour, index) => {
+        if (!selectedTours.has(tour.id)) return;
+        
+        // 確保 points 存在且是陣列
+        if (!tour.points || !Array.isArray(tour.points) || tour.points.length === 0) {
+          console.warn(`行程 ${tour.id} 沒有景點資料`);
+          return;
+        }
+
+        const points = tour.points;
+        const lineData = [];
+        
+        // 建立連續路線
+        for (let i = 0; i < points.length - 1; i++) {
+          lineData.push({
+            fromName: points[i].name,
+            toName: points[i + 1].name,
+            coords: [points[i].coords, points[i + 1].coords]
+          });
+        }
+
+        // 路線效果
+        series.push({
+          name: tour.name,
+          type: 'lines',
+          coordinateSystem: 'geo',
+          zlevel: 1,
+          effect: {
+            show: true,
+            period: 4,
+            trailLength: 0.3,
+            color: '#fff',
+            symbolSize: 6
+          },
+          lineStyle: {
+            color: tour.color,
+            width: 3,
+            curveness: 0.1
+          },
+          data: lineData
+        });
+
+        // 路線箭頭
+        series.push({
+          name: tour.name,
+          type: 'lines',
+          coordinateSystem: 'geo',
+          zlevel: 2,
+          symbol: ['none', 'arrow'],
+          symbolSize: 12,
+          lineStyle: {
+            color: tour.color,
+            width: 3,
+            curveness: 0.1
+          },
+          data: lineData
+        });
+
+        // 一般景點標記
+        series.push({
+          name: tour.name,
+          type: 'scatter',
+          coordinateSystem: 'geo',
+          zlevel: 3,
+          symbolSize: 16,
+          itemStyle: {
+            color: tour.color,
+            borderColor: '#fff',
+            borderWidth: 2
+          },
+          label: {
+            show: true,
+            position: 'right',
+            formatter: '{b}',
+            fontSize: window.innerWidth <= 767 ? 9 : 11,
+            color: '#fff',
+            backgroundColor: 'rgba(0,0,0,0.6)',
+            padding: [4, 8],
+            borderRadius: 4
+          },
+          data: points.filter(p => p.name !== tour.focusPoint?.name).map(p => ({
+            name: p.name,
+            value: [...p.coords, p.time],
+            time: p.time,
+            duration: p.duration,
+            note: p.note
+          }))
+        });
+
+        // 主軸地點特殊標記
+        if (tour.focusPoint) {
+          series.push({
+            name: tour.name + ' 主軸',
+            type: 'scatter',
+            coordinateSystem: 'geo',
+            symbol: 'pin',
+            zlevel: 4,
+            symbolSize: window.innerWidth <= 767 ? [50, 65] : [60, 80],
+            itemStyle: {
+              color: tour.color
+            },
+            label: {
+              show: true,
+              formatter: tour.type === '一日遊' ? '🍴' : '🏨',
+              position: 'inside',
+              fontSize: window.innerWidth <= 767 ? 22 : 28,
+              color: '#fff',
+              offset: [0, -8]
+            },
+            data: [{
+              name: tour.focusPoint.name,
+              value: [...tour.focusPoint.coords, tour.focusPoint.time],
+              time: tour.focusPoint.time,
+              duration: tour.focusPoint.duration,
+              note: tour.focusPoint.note
+            }]
+          });
+        }
+
+        // 起點標記
+        const startPoint = points[0];
+        series.push({
+          name: tour.name + ' 起點',
+          type: 'scatter',
+          coordinateSystem: 'geo',
+          symbol: 'circle',
+          zlevel: 4,
+          symbolSize: window.innerWidth <= 767 ? 22 : 28,
+          itemStyle: {
+            color: '#fff',
+            borderColor: tour.color,
+            borderWidth: 4
+          },
+          label: {
+            show: true,
+            formatter: '起',
+            position: 'inside',
+            fontSize: window.innerWidth <= 767 ? 11 : 14,
+            color: tour.color,
+            fontWeight: 'bold'
+          },
+          data: [{
+            name: startPoint.name,
+            value: [...startPoint.coords, startPoint.time],
+            time: startPoint.time,
+            duration: startPoint.duration,
+            note: startPoint.note
+          }]
+        });
+      });
+
+      const option = {
+        backgroundColor: '#404a59',
+        title: {
+          text: 'Pxmart 員工旅遊路線圖',
+          left: 'center',
+          top: 20,
+          textStyle: {
+            color: '#fff',
+            fontSize: window.innerWidth <= 767 ? 16 : 24,
+            fontWeight: 'bold'
+          }
+        },
+        tooltip: {
+          trigger: 'item',
+          formatter: function(params) {
+            if (params.componentSubType === 'scatter' || params.componentSubType === 'effectScatter') {
+              const data = params.data;
+              return `
+                <div style="padding: 8px;">
+                  <strong style="font-size: 14px;">${params.name}</strong><br/>
+                  <span style="color: #666;">到達時間：</span>${data.time || '未指定'}<br/>
+                  <span style="color: #666;">停留時間：</span>${data.duration || '未指定'}<br/>
+                  ${data.note ? `<span style="color: #666;">說明：</span>${data.note}` : ''}
+                </div>
+              `;
+            }
+            return params.name;
+          },
+          backgroundColor: 'rgba(255,255,255,0.95)',
+          borderColor: '#ccc',
+          borderWidth: 1,
+          textStyle: {
+            color: '#333'
+          }
+        },
+        geo: {
+          map: 'TW',
+          layoutCenter: ['42%', '42%'],
+          layoutSize: window.innerWidth <= 767 ? '120%' : '95%',
+          aspectScale: 1,
+          zoom: window.innerWidth <= 767 ? 1.2 : 1.1,
+          roam: true,
+          itemStyle: {
+            areaColor: '#323c48',
+            borderColor: '#555'
+          },
+          emphasis: {
+            itemStyle: {
+              areaColor: '#2a333d'
+            }
+          }
+        },
+        series: series
+      };
+
+      myChart.setOption(option, true);
+    }
+
+    function renderSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      
+      // 分組行程
+      const oneDayTours = toursData.filter(t => t.type === '一日遊');
+      const twoDayTours = toursData.filter(t => t.type === '二日遊');
+      
+      const renderTourCards = (tours) => tours.map(tour => {
+        return `
+          <div class="tour-card ${selectedTours.has(tour.id) ? 'active' : ''}" 
+               style="color: ${tour.color};"
+               onclick="toggleTour('${tour.id}')">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="tour-badge" style="background: ${tour.color};">${tour.id}</span>
+              <span style="flex: 1; font-weight: 500;">${tour.name}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      const html = `
+        <div class="sidebar-header">
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <h2>🗺️ 行程</h2>
+            ${window.innerWidth <= 767 ? '<button class="close-sidebar" onclick="toggleSidebar()">✕</button>' : ''}
+          </div>
+        </div>
+        
+        ${oneDayTours.length > 0 ? `
+          <div class="tour-section">
+            <div class="section-title">🌞 一日遊</div>
+            ${renderTourCards(oneDayTours)}
+          </div>
+        ` : ''}
+        
+        ${twoDayTours.length > 0 ? `
+          <div class="tour-section">
+            <div class="section-title">🌙 二日遊</div>
+            ${renderTourCards(twoDayTours)}
+          </div>
+        ` : ''}
+      `;
+      
+      sidebar.innerHTML = html;
+    }
+
+    function toggleTour(tourId) {
+      if (selectedTours.has(tourId)) {
+        selectedTours.delete(tourId);
+      } else {
+        selectedTours.add(tourId);
+      }
+      renderSidebar();
+      updateChart();
+      
+      // 手機版選擇後自動關閉側邊欄
+      if (window.innerWidth <= 767) {
+        setTimeout(() => toggleSidebar(), 300);
+      }
+    }
+
+    // 切換側邊欄（手機版）
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('show');
+    }
+
+    // 啟動應用
+    init();
+
+    // 視窗大小改變時重新渲染
+    window.addEventListener('resize', () => {
+      if (myChart) {
+        myChart.resize();
+      }
+    });
+  </script>
+</body>
+</html>
